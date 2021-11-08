@@ -12,7 +12,10 @@ x = 50
 y = 50
 width = 64
 height = 64
-vel = 2
+basespeed = 2
+boostmodifier = 3
+boostspeed = basespeed * boostmodifier
+vel = basespeed
 
 def player():
     screen.blit(playerImg,(x,y))
@@ -38,9 +41,9 @@ while running:
     if buttons[pygame.K_DOWN] and y < displaywidth - height - vel:
         y += vel
     if buttons[pygame.K_SPACE]:
-        vel = 4
+        vel = boostspeed
     else:
-        vel = 2
+        vel = basespeed
 
     player()
    
