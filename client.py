@@ -13,7 +13,7 @@ y = 50
 width = 64
 height = 64
 basespeed = 2
-boostmodifier = 3
+boostmodifier = 2
 boostspeed = basespeed * boostmodifier
 vel = basespeed
 
