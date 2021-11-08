@@ -11,7 +11,7 @@ x = 50
 y = 50
 width = 64
 height = 64
-vel = 15
+vel = 2
 
 def player():
     screen.blit(playerImg,(x,y))
@@ -19,7 +19,7 @@ def player():
 
 running = True
 while running:
-    pygame.time.delay(100)
+    pygame.time.delay(10)
     screen.fill((255, 255, 255
     ))
     for event in pygame.event.get():
