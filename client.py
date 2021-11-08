@@ -1,4 +1,5 @@
 import pygame
+import math
 
 pygame.init()
 displaywidth = 900
@@ -47,6 +48,4 @@ while running:
 
     player()
    
-    
-
 pygame.quit()
