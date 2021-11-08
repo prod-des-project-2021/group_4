@@ -24,9 +24,9 @@ def player():
 
 running = True
 while running:
+    #frame rate: 7 = about 142.9 fps, 17 = about 58.8 fps, 10 = exactly 100 fps
     pygame.time.delay(10)
-    screen.fill((255, 255, 255
-    ))
+    screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
