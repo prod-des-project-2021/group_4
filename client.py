@@ -2,6 +2,9 @@ import pygame
 import math
 
 pygame.init()
+
+#resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
+#resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
 displaywidth = 900
 displayheight = 900
 screen = pygame.display.set_mode((displaywidth, displayheight))
@@ -33,13 +36,13 @@ while running:
     
     buttons = pygame.key.get_pressed()
 
-    if buttons[pygame.K_LEFT] and x > vel:
+    if buttons[pygame.K_a] and x > vel:
         x -= vel
-    if buttons[pygame.K_RIGHT] and x < displaywidth - width + vel:
+    if buttons[pygame.K_d] and x < displaywidth - width + vel:
         x += vel
-    if buttons[pygame.K_UP] and y > vel:
+    if buttons[pygame.K_w] and y > vel:
         y -= vel
-    if buttons[pygame.K_DOWN] and y < displaywidth - height - vel:
+    if buttons[pygame.K_s] and y < displaywidth - height - vel:
         y += vel
     if buttons[pygame.K_SPACE]:
         vel = boostspeed
