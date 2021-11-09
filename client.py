@@ -43,7 +43,6 @@ while running:
 
     buttons = pygame.key.get_pressed()
 
-<<<<<<< Updated upstream
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
         x += slowmodifier * vel
         y += slowmodifier * vel
@@ -57,12 +56,10 @@ while running:
         x -= slowmodifier * vel
         y -= slowmodifier * vel
    
-=======
     angle +=1
     playerImg2 = pygame.transform.rotate(playerImg,angle)
     rect = playerImg.get_rect(center=rect.center)
     
->>>>>>> Stashed changes
     if buttons[pygame.K_a] and x > vel:
         x -= vel
     if buttons[pygame.K_d] and x < displaywidth - width + vel:
@@ -76,7 +73,6 @@ while running:
         vel = boostspeed
     else:
         vel = basespeed
-
 
     player()
     
