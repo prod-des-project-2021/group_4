@@ -19,6 +19,7 @@ height = 64
 basespeed = 2
 boostmodifier = 2
 boostspeed = basespeed * boostmodifier
+slowmodifier = 0.5
 vel = basespeed
 
 def player():
@@ -36,6 +37,19 @@ while running:
     
     buttons = pygame.key.get_pressed()
 
+    if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
+        x += slowmodifier * vel
+        y += slowmodifier * vel
+    if buttons[pygame.K_a] and buttons[pygame.K_s] and x > vel and y < displaywidth - height - vel:
+        x += slowmodifier * vel
+        y -= slowmodifier * vel   
+    if buttons[pygame.K_d] and buttons[pygame.K_w] and x < displaywidth - width + vel and y > vel:
+        x -= slowmodifier * vel
+        y += slowmodifier * vel
+    if buttons[pygame.K_d] and buttons[pygame.K_s] and x < displaywidth - width + vel and y< displaywidth - height - vel:
+        x -= slowmodifier * vel
+        y -= slowmodifier * vel
+   
     if buttons[pygame.K_a] and x > vel:
         x -= vel
     if buttons[pygame.K_d] and x < displaywidth - width + vel:
@@ -44,6 +58,7 @@ while running:
         y -= vel
     if buttons[pygame.K_s] and y < displaywidth - height - vel:
         y += vel
+
     if buttons[pygame.K_SPACE]:
         vel = boostspeed
     else:
