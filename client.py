@@ -41,6 +41,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+    angle +=1
+    playerImg2 = pygame.transform.rotate(playerImg,angle)
+    rect = playerImg.get_rect(center=rect.center)
+
     buttons = pygame.key.get_pressed()
 
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
@@ -55,10 +59,6 @@ while running:
     if buttons[pygame.K_d] and buttons[pygame.K_s] and x < displaywidth - width + vel and y< displaywidth - height - vel:
         x -= slowmodifier * vel
         y -= slowmodifier * vel
-   
-    angle +=1
-    playerImg2 = pygame.transform.rotate(playerImg,angle)
-    rect = playerImg.get_rect(center=rect.center)
     
     if buttons[pygame.K_a] and x > vel:
         x -= vel
