@@ -76,5 +76,4 @@ while running:
 
     player()
     
-   
 pygame.quit()
