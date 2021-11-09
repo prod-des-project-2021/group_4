@@ -1,6 +1,8 @@
 import pygame
 import math
 
+from pygame.transform import rotate
+
 pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
@@ -12,6 +14,7 @@ screen = pygame.display.set_mode((displaywidth, displayheight))
 pygame.display.set_caption("Multiplayer Game")
 
 playerImg = pygame.image.load('player.png')
+angle = 0
 x = 50
 y = 50
 width = 64
@@ -21,10 +24,13 @@ boostmodifier = 2
 boostspeed = basespeed * boostmodifier
 slowmodifier = 0.5
 vel = basespeed
+rect = playerImg.get_rect(center=(x,y))
+
 
 def player():
-    screen.blit(playerImg,(x,y))
+    screen.blit(playerImg2,rect)
     pygame.display.update()
+    
 
 running = True
 while running:
@@ -34,9 +40,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    
+
     buttons = pygame.key.get_pressed()
 
+<<<<<<< Updated upstream
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
         x += slowmodifier * vel
         y += slowmodifier * vel
@@ -50,6 +57,12 @@ while running:
         x -= slowmodifier * vel
         y -= slowmodifier * vel
    
+=======
+    angle +=1
+    playerImg2 = pygame.transform.rotate(playerImg,angle)
+    rect = playerImg.get_rect(center=rect.center)
+    
+>>>>>>> Stashed changes
     if buttons[pygame.K_a] and x > vel:
         x -= vel
     if buttons[pygame.K_d] and x < displaywidth - width + vel:
@@ -64,6 +77,8 @@ while running:
     else:
         vel = basespeed
 
+
     player()
+    
    
 pygame.quit()
