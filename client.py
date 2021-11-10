@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 from pygame.transform import rotate
 
@@ -22,13 +23,13 @@ height = 64
 basespeed = 2
 boostmodifier = 2
 boostspeed = basespeed * boostmodifier
-slowmodifier = 0.5
+slowmodifier = 0.4
 vel = basespeed
-rect = playerImg.get_rect(center=(x,y))
 
 
-def player():
-    screen.blit(playerImg2,rect)
+
+def updateScreen():
+    screen.blit(playerImg, (x, y))
     pygame.display.update()
     
 
@@ -40,10 +41,6 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    angle +=1
-    playerImg2 = pygame.transform.rotate(playerImg,angle)
-    rect = playerImg.get_rect(center=rect.center)
 
     buttons = pygame.key.get_pressed()
 
@@ -74,6 +71,6 @@ while running:
     else:
         vel = basespeed
 
-    player()
+    updateScreen()
     
 pygame.quit()
