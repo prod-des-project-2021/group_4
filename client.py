@@ -25,6 +25,8 @@ height = 64
 basespeed = 2
 boostmodifier = 2
 boostspeed = basespeed * boostmodifier
+boostfuel = 100
+maxboostfuel = 300
 slowmodifier = 0.4
 vel = basespeed
 green = 0,255,0
@@ -91,11 +93,15 @@ while running:
         bulletY -= 5
         fire_bullet(bulletX,bulletY)
     if buttons[pygame.K_SPACE]:
-        vel = boostspeed
+        if boostfuel > 0:
+            vel = boostspeed
+            boostfuel -= 2
+        else:
+            vel = basespeed
     else:
         vel = basespeed
-    
-        
+        if boostfuel < maxboostfuel:
+            boostfuel += 1
     
     updateScreen(x,y)
     
