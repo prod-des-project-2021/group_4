@@ -1,0 +1,53 @@
+Protokollan suunnittelu
+
+Paketit:
+
+|Seq. no.     | Flag    | Payload         |
+[ 00 00 00 00 ] [ 00 00 ] [ 00 00 00 00 ....]
+
+Sekvenssinumero
+4 tavua, 32 bittiä, kokonaisluku
+Paketin järjestysnumero. Jos viimeisimmän paketin numero on suurempi kuin tulevan paketin,
+se pudotetaan automaattisesti.
+
+Flag - 65 536 eri vaihtoehtoa paketin tyypille.
+2 tavua, 16 bittiä
+
+Server -> Client
+00 00 = CONNECTION_ACCEPTED, palvelin hyväksyi yhteyden
+00 01 = CONNECTION_DENIED, palvelin ei hyväksynyt yhteyttä, syy?
+00 02 = WORLD_STATE, maailman tila, pelaajien sijainnit yms.
+00 03 =
+00 04 =
+00 05 =
+00 06 =
+00 07 =
+00 08 =
+00 09 =
+00 0A =
+00 0B =
+00 0C =
+00 0D =
+00 0E =
+00 0F =
+
+Server -> Server
+FF FF = Break out the socket listen 
+
+Client -> Server
+10 00 = CONNECTION_START, yhteyden muodostus
+10 01 = WORLD_STATE_RECEIVED, vastaus 'maailman tila' -viestiin
+10 02 =
+10 03 =
+10 04 =
+10 05 =
+10 06 =
+10 07 =
+10 08 =
+10 09 =
+10 0A =
+10 0B =
+10 0C =
+10 0D =
+10 0E =
+10 0F =
