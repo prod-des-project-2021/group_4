@@ -9,6 +9,7 @@ pygame.init()
 displaywidth = 900
 displayheight = 900
 screen = pygame.display.set_mode((displaywidth, displayheight))
+clock = pygame.time.Clock()
 
 #Caption
 pygame.display.set_caption("Multiplayer Game")
@@ -18,9 +19,10 @@ playerImg = pygame.image.load('player.png')
 angle = 0
 x = 50
 y = 50
+bullets = []
 width = 64
 height = 64
-basespeed = 2
+basespeed = 4
 boostmodifier = 2
 boostspeed = basespeed * boostmodifier
 boostfuel = 100
@@ -39,18 +41,34 @@ bulletImg = pygame.image.load('bullet1.png')
 bulletX = x
 bulletY = y
 
-def updateScreen(x2,y2):
+class Square:
+    def __init__(self, color, x, y, width, height, speed):
+        self.rect = pygame.Rect(x,y,width,height)
+        self.color = color
+        self.speed = speed
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
+
+class Bullet(Square):
+    def __init__(self, color, x, y, width, height, speed, targetX, targetY):
+        super().__init__(color, x, y, width, height, speed)
+        angle = math.atan2(targetY-y, targetX-x) #radians
+        self.dx = math.cos(angle)*speed
+        self.dy = math.sin(angle)*speed
+        self.x = x
+        self.y = y
+    def moveBullet(self):
+        self.rect.x = self.rect.x + float(self.dx)
+        self.rect.y = self.rect.y + float(self.dy)
+
+def updatePlayer(x2,y2):
     screen.blit(playerImg, (x2, y2))
     pygame.display.update()
-    
-def fire_bullet(x2,y2):
-    y2 -= 10
-    screen.blit(bulletImg,(x2 + 9 ,y2))
 
 running = True
 while running:
     #frame rate: 7 = about 142.9 fps, 17 = about 58.8 fps, 10 = exactly 100 fps
-    pygame.time.delay(10)
+    clock.tick(60)
     screen.fill((white))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -81,15 +99,10 @@ while running:
         y += vel
 
     if event.type == pygame.MOUSEBUTTONDOWN:
-        if bulletY < 0:
-            targetX, targetY = pygame.mouse.get_pos()
-            print(targetX,targetY)
-            bulletX = x
-            bulletY = y
-            fire_bullet(bulletX,bulletY)
-    if bulletY >= 0 and bulletY < displayheight and bulletX >= 0 and bulletX < displaywidth: #moving bullet as long as it is visible
-        bulletY -= 5
-        fire_bullet(bulletX,bulletY)
+        targetX, targetY = pygame.mouse.get_pos()
+        print(targetX,targetY) #comment this later
+        b = Bullet(red, (x+width/2), (y+height/2), 20, 20, 10, targetX, targetY)
+        bullets.append(b)
 
     if buttons[pygame.K_SPACE]:
         if boostfuel > 0:
@@ -102,6 +115,11 @@ while running:
         if boostfuel < maxboostfuel:
             boostfuel += 1
     
-    updateScreen(x,y)
+    screen.fill(white)
+    for b in bullets:
+        b.moveBullet()
+        b.draw(screen)
+
+    updatePlayer(x,y)
     
 pygame.quit()
