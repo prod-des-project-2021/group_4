@@ -41,9 +41,6 @@ bulletImg = pygame.image.load('bullet1.png')
 bulletX = x
 bulletY = y
 
-
-
-
 def updateScreen(x2,y2):
     screen.blit(playerImg, (x2, y2))
     pygame.display.update()
@@ -84,14 +81,16 @@ while running:
         y -= vel
     if buttons[pygame.K_s] and y < displaywidth - height - vel:
         y += vel
+        
     if buttons[pygame.K_x]:
         if bulletY < 0:
-         bulletX = x
-         bulletY = y
-         fire_bullet(bulletX,bulletY)
-    if bulletY >= 0:
+            bulletX = x
+            bulletY = y
+            fire_bullet(bulletX,bulletY)
+    if bulletY >= 0 and bulletY < displayheight and bulletX >= 0 and bulletX < displaywidth: #moving bullet as long as it is visible
         bulletY -= 5
         fire_bullet(bulletX,bulletY)
+
     if buttons[pygame.K_SPACE]:
         if boostfuel > 0:
             vel = boostspeed
