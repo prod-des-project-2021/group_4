@@ -1,7 +1,5 @@
 import pygame
 import math
-
-
 from pygame.transform import rotate
 
 pygame.init()
@@ -81,9 +79,11 @@ while running:
         y -= vel
     if buttons[pygame.K_s] and y < displaywidth - height - vel:
         y += vel
-        
-    if buttons[pygame.K_x]:
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
         if bulletY < 0:
+            targetX, targetY = pygame.mouse.get_pos()
+            print(targetX,targetY)
             bulletX = x
             bulletY = y
             fire_bullet(bulletX,bulletY)
