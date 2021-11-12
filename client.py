@@ -20,6 +20,9 @@ angle = 0
 x = 50
 y = 50
 bullets = []
+tickrate = 60
+lastshot = 0        
+firerate = 4        #shots per second
 width = 64
 height = 64
 basespeed = 4
@@ -29,17 +32,14 @@ boostfuel = 100
 maxboostfuel = 300
 slowmodifier = 0.4
 vel = basespeed
+
+#colors
 green = 0,255,0
 red = 255,0,0
 blue = 0,0,255
 yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
-
-#Bullet
-bulletImg = pygame.image.load('bullet1.png')
-bulletX = x
-bulletY = y
 
 class Square:
     def __init__(self, color, x, y, width, height, speed):
@@ -58,8 +58,10 @@ class Bullet(Square):
         self.x = x
         self.y = y
     def moveBullet(self):
-        self.rect.x = self.rect.x + float(self.dx)
-        self.rect.y = self.rect.y + float(self.dy)
+        self.x = self.x + self.dx
+        self.y = self.y + self.dy
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
 
 def updatePlayer(x2,y2):
     screen.blit(playerImg, (x2, y2))
@@ -67,14 +69,14 @@ def updatePlayer(x2,y2):
 
 running = True
 while running:
-    #frame rate: 7 = about 142.9 fps, 17 = about 58.8 fps, 10 = exactly 100 fps
-    clock.tick(60)
-    screen.fill((white))
+    clock.tick(tickrate)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     buttons = pygame.key.get_pressed()
+    mousebuttons = pygame.mouse.get_pressed()
 
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
         x += slowmodifier * vel
@@ -98,11 +100,13 @@ while running:
     if buttons[pygame.K_s] and y < displaywidth - height - vel:
         y += vel
 
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        targetX, targetY = pygame.mouse.get_pos()
-        print(targetX,targetY) #comment this later
-        b = Bullet(red, (x+width/2), (y+height/2), 20, 20, 10, targetX, targetY)
-        bullets.append(b)
+    if mousebuttons[0]:
+        if lastshot > tickrate/firerate:
+            targetX, targetY = pygame.mouse.get_pos()
+            #print(targetX,targetY) #comment this later
+            b = Bullet(red, (x+width/2), (y+height/2), 20, 20, 10, targetX, targetY)
+            bullets.append(b)
+            lastshot = 0
 
     if buttons[pygame.K_SPACE]:
         if boostfuel > 0:
@@ -115,11 +119,16 @@ while running:
         if boostfuel < maxboostfuel:
             boostfuel += 1
     
+    for b in bullets:
+        if b.rect.x > displaywidth or b.rect.x <= 0:
+            bullets.remove(b)
+        elif b.rect.y >displayheight or b.rect.y <= 0:
+            bullets.remove(b)
+    lastshot+=1
     screen.fill(white)
     for b in bullets:
         b.moveBullet()
         b.draw(screen)
-
     updatePlayer(x,y)
     
 pygame.quit()
