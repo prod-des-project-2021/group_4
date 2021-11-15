@@ -59,7 +59,6 @@ class Bullet(Square):
         super().__init__(color, x, y, width, height, speed)
         angle = math.atan2(targetY-y, targetX-x) #radians
         #  ^^  send bullet angle to server whenever you are at that point
-        self.rect = pygame,transform.rotate(self.rect,int(angle*180/math.pi)-180)
         self.dx = math.cos(angle)*speed
         self.dy = math.sin(angle)*speed
         self.x = x
