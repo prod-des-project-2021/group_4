@@ -1,6 +1,8 @@
 import pygame
 import math
 import random
+from pygame import transform
+from pygame.draw import rect
 from pygame.transform import rotate
 
 pygame.init()
@@ -36,6 +38,7 @@ slowmodifier = 0.4
 vel = basespeed
 
 #colors
+grey = 75,75,75
 green = 0,255,0
 red = 255,0,0
 blue = 0,0,255
@@ -56,6 +59,7 @@ class Bullet(Square):
         super().__init__(color, x, y, width, height, speed)
         angle = math.atan2(targetY-y, targetX-x) #radians
         #  ^^  send bullet angle to server whenever you are at that point
+        self.rect = pygame,transform.rotate(self.rect,int(angle*180/math.pi)-180)
         self.dx = math.cos(angle)*speed
         self.dy = math.sin(angle)*speed
         self.x = x
@@ -135,7 +139,7 @@ while running:
         if lastshot > tickrate/firerate:
             targetX, targetY = pygame.mouse.get_pos()
             #print(targetX,targetY) #comment this later
-            b = Bullet(red, (x), (y), 20, 20, 10, targetX, targetY)
+            b = Bullet(red, (x), (y), 20, 4, 10, targetX, targetY)
             bullets.append(b)
             lastshot = 0
 
@@ -156,7 +160,7 @@ while running:
         elif b.rect.y > displayheight or b.rect.y <= 0:
             bullets.remove(b)
     lastshot+=1
-    screen.fill(white)
+    screen.fill(grey)
 
     for e in enemies:
         e.moveEnemy()
