@@ -27,27 +27,34 @@ class Square:
 
 def main():
     packet = Packet()
-    packet.priority = 1
-    packet.seq = 0
-    packet.payload = 1593953959
+    packet.priority = Packet.Priority.ACK_REQUIRED
+    packet.seq = 1
+    packet.type = Packet.Type.ACK
 
-    print(packet.encode())
+    packet.setPayload(bytes("assssdasdasdassss this can be anything", "utf-8"))
+
+    endp = packet.encode()
+    packet2 = Packet()
+    packet2.decode(endp)
+
+    packet2.printDebug()
 
     pygame.init()
     screen = pygame.display.set_mode((800,600))
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(b'test', ("127.0.0.1", 5555))
+    sock.sendto(packet2.encode(), ("127.0.0.1", 5555))
     running = True
 
     obj = Square()
 
     while(running):
+        packet2.seq = int(obj.x)
+
         screen.fill(pygame.Color("black"))
         obj.update()
         obj.draw(screen)
 
-        sock.sendto(bytes(int(obj.x)), ("127.0.0.1", 5555))
         pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
