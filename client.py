@@ -55,7 +55,7 @@ class Bullet(Square):
     def __init__(self, color, x, y, width, height, speed, targetX, targetY):
         super().__init__(color, x, y, width, height, speed)
         angle = math.atan2(targetY-y, targetX-x) #radians
-        #  ^^  send to server whenever you are at that point
+        #  ^^  send bullet angle to server whenever you are at that point
         self.dx = math.cos(angle)*speed
         self.dy = math.sin(angle)*speed
         self.x = x
@@ -70,6 +70,7 @@ class Bullet(Square):
 def updatePlayer(x2,y2):
     screen.blit(playerImg, (x2, y2))
     pygame.display.update()
+    #updateServer() or something similar here
 
 class Enemy(Square):
     def __init__(self, color, x, y, width, height, tempspeed):
@@ -79,10 +80,10 @@ class Enemy(Square):
         self.color = color
 
     def moveEnemy(self):
-        self.dx = 0
+        self.dx = 0                           #most of these are useless when we get other players from server
         self.dy = basespeed * slowmodifier    #here for testing only (get these from server at some point)
         self.x = self.x + self.dx
-        self.y = self.y + self.dy
+        self.y = self.y + self.dy       
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
 
@@ -163,5 +164,6 @@ while running:
         b.moveBullet()
         b.draw(screen)
     updatePlayer(x,y)
+
     
 pygame.quit()
