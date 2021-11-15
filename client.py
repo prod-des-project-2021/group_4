@@ -53,6 +53,7 @@ black = 0,0,0
 
 def updatePlayer(x,y):
     mousex,mousey = pygame.mouse.get_pos()
+    global angle 
     angle = math.atan2(mousex - x, mousey - y)
     playrot = pygame.transform.rotozoom(playerImg,int(angle*180/math.pi)-180,1)
     playpos = (x - playrot.get_rect().width/2,y - playrot.get_rect().height/2)
@@ -129,9 +130,9 @@ while running:
 
     if mousebuttons[0]:
         if lastshot > tickrate/firerate:
-            targetX, targetY = pygame.mouse.get_pos()
+            #targetX, targetY = pygame.mouse.get_pos()
             #print(targetX,targetY) #comment this later
-            b = Bullet(bulletImg, (x-8), (y-8), 10, targetX, targetY)
+            b = Bullet(bulletImg, (x-9), (y-9), 10, -angle + math.pi/2 )
             bullets.append(b)
             lastshot = 0
 
