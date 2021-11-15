@@ -1,12 +1,14 @@
 #from .connectionListener import ConnectionListener
 import socket
 import threading
+import time
 
 from .clienthandler import ClientHandler
 from .packet import Packet
 
-class Service:
+class Service(threading.Thread):
     def __init__(self, addr, port):
+        super().__init__()
         self.running = True
         self.addr = addr
         self.port = port
@@ -41,7 +43,7 @@ class Service:
             print("Could not bind socket on "+str(self.addr)+":"+str(self.port))
             self.running = False
 
-    def start(self):
+    def run(self):
         while(self.running):
             try:
                 packet = self.socket.recvfrom(self.bufferSize)
@@ -57,6 +59,16 @@ class Service:
             except socket.error:
                 print("Socket encountered an error!")
                 self.running = False
+
+    def stop(self):
+        self.running = False
+        self.breakOutSocket()
+
+    def tick(self):
+        clock = time.perf_counter() * self.tickRate
+        sleep = int(clock) + 1 - clock
+        time.sleep(sleep/self.tickRate)
+
 
     def processPacket(self, addr, port, payload):
 
@@ -97,6 +109,6 @@ class Service:
                 print("Command not found")
 
     def breakOutSocket(self):
-        # send a dummy packet to close the socket 
+        # send a dummy packet to close the socket
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.sendto(Packet().encode(), (self.addr, self.port))

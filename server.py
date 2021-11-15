@@ -36,7 +36,12 @@ def main():
     server.start()
 
     while(server.running):
-        pass # do the game simulation
+
+
+        # tickrate limiter
+        server.tick()
+
+    server.stop()
 
 if __name__ == '__main__':
     main()
