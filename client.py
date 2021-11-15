@@ -16,7 +16,7 @@ clock = pygame.time.Clock()
 pygame.display.set_caption("Multiplayer Game")
 
 #Player values
-playerImg = pygame.image.load('player.png')
+playerImg = pygame.image.load('player2.png')
 angle = 0
 x = 50
 y = 50
@@ -67,8 +67,12 @@ class Bullet(Square):
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
 
-def updatePlayer(x2,y2):
-    screen.blit(playerImg, (x2, y2))
+def updatePlayer(x,y):
+    mousex,mousey = pygame.mouse.get_pos()
+    angle = math.atan2(mousex - x, mousey - y)
+    playrot = pygame.transform.rotozoom(playerImg,int(angle*180/math.pi)-180,1)
+    playpos = (x - playrot.get_rect().width/2,y - playrot.get_rect().height/2)
+    screen.blit(playrot, playpos)
     pygame.display.update()
     #updateServer() or something similar here
 
@@ -131,7 +135,7 @@ while running:
         if lastshot > tickrate/firerate:
             targetX, targetY = pygame.mouse.get_pos()
             #print(targetX,targetY) #comment this later
-            b = Bullet(red, (x+width/2), (y+height/2), 20, 20, 10, targetX, targetY)
+            b = Bullet(red, (x), (y), 20, 20, 10, targetX, targetY)
             bullets.append(b)
             lastshot = 0
 
