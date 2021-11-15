@@ -3,6 +3,7 @@ import socket
 import threading
 
 from .clienthandler import ClientHandler
+from .packet import Packet
 
 class Service:
     def __init__(self, addr, port):
@@ -49,27 +50,41 @@ class Service:
                 packet_payload = packet[0]
 
                 # deliver the packet to the clientHandler
-                self.processPacket(packet_addr, packet_port, packet_payload)
+                # spawn a new thread so we are instantly ready to receive something again
+                dispatchPacket = threading.Thread(target = self.processPacket, args = (packet_addr, packet_port, packet_payload))
+                dispatchPacket.start()
 
             except socket.error:
                 print("Socket encountered an error!")
                 self.running = False
 
     def processPacket(self, addr, port, payload):
-        self.onReceive(self, addr, payload)
+
         # checking if the packet is for an existing client
-        #existingClient = False
-        #for client in self.clients:
-            #if client.addr == addr and client.port == port:
-                #client.addToInputBuffer(payload)
-                #existingClient = True
-                #break
+        existingClient = False
+        for client in self.clients:
+            if client.addr == addr and client.port == port:
+
+                # handle the decoding here so rest of the code
+                # can use just Packet objects
+                packet = Packet()
+                packet.decode(payload)
+
+                # add the packet to clients input buffer
+                client.addToInputBuffer(packet)
+                existingClient = True
+                break
 
         # if not, spawn a new client
-        #if existingClient == False:
-            #pass # spawn the client
+        if existingClient == False:
 
-
+            # creating a new instance of ClientHandler
+            # and pass the incoming packet to it to handle
+            newClient = ClientHandler(self, addr, port)
+            packet = Packet()
+            packet.decode(payload)
+            newClient.addToInputBuffer(packet)
+            self.clients.append(newClient)
 
     def io(self):
         while(self.running):
@@ -82,5 +97,6 @@ class Service:
                 print("Command not found")
 
     def breakOutSocket(self):
+        # send a dummy packet to close the socket 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.sendto(bytes("0000", "utf-8"), (self.addr, self.port))
+        sock.sendto(Packet().encode(), (self.addr, self.port))

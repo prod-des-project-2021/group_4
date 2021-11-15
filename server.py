@@ -1,7 +1,8 @@
 from networking import Service
+from networking import Packet
 
-def onConnect(server, client, packet):
-    pass
+def onConnect(client, packet):
+    print("New client has connected")
 
 def onDisconnect(server, client):
     pass
@@ -12,8 +13,11 @@ def onTimeout(server, client):
 def onReconnect(server, client):
     pass
 
+def onStop(server, clients):
+    pass
+
 def onReceive(server, client, packet):
-    print(packet)
+    print(packet.seq)
 
 def main():
     print("Starting the server...")
