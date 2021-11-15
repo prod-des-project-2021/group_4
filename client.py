@@ -19,6 +19,7 @@ pygame.display.set_caption("Multiplayer Game")
 
 #Player values
 playerImg = pygame.image.load('player2.png')
+bulletImg = pygame.image.load('bullet2.png')
 angle = 0
 x = 50
 y = 50
@@ -46,6 +47,7 @@ yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
 
+
 class Square:
     def __init__(self, color, x, y, width, height, speed):
         self.rect = pygame.Rect(x,y,width,height)
@@ -59,10 +61,12 @@ class Bullet(Square):
         super().__init__(color, x, y, width, height, speed)
         angle = math.atan2(targetY-y, targetX-x) #radians
         #  ^^  send bullet angle to server whenever you are at that point
+        self.rotatedbullet, self.rotated_rect = rotate(bulletImg,angle)
         self.dx = math.cos(angle)*speed
         self.dy = math.sin(angle)*speed
         self.x = x
         self.y = y
+
 
     def moveBullet(self):
         self.x = self.x + self.dx
@@ -94,6 +98,11 @@ class Enemy(Square):
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
 
+
+def rotate(surface,angle,width,height):
+   rotated_surface = pygame.transform.rotozoom(surface,angle,1)
+   rotated_rect = rotated_surface.get_rect(center = (width,height))
+   return rotated_surface, rotated_rect
 
 running = True
 while running:
