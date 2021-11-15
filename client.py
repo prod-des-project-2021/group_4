@@ -1,6 +1,9 @@
 import pygame
 import math
 import random
+
+from GameObjects import Bullet
+
 from pygame import transform
 from pygame.draw import rect
 from pygame.transform import rotate
@@ -48,32 +51,6 @@ white = 255,255,255
 black = 0,0,0
 
 
-class Square:
-    def __init__(self, color, x, y, width, height, speed):
-        self.rect = pygame.Rect(x,y,width,height)
-        self.color = color
-        self.speed = speed
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-
-class Bullet(Square):
-    def __init__(self, color, x, y, width, height, speed, targetX, targetY):
-        super().__init__(color, x, y, width, height, speed)
-        angle = math.atan2(targetY-y, targetX-x) #radians
-        #  ^^  send bullet angle to server whenever you are at that point
-        self.rotatedbullet, self.rotated_rect = rotate(bulletImg,angle)
-        self.dx = math.cos(angle)*speed
-        self.dy = math.sin(angle)*speed
-        self.x = x
-        self.y = y
-
-
-    def moveBullet(self):
-        self.x = self.x + self.dx
-        self.y = self.y + self.dy
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
-
 def updatePlayer(x,y):
     mousex,mousey = pygame.mouse.get_pos()
     angle = math.atan2(mousex - x, mousey - y)
@@ -82,6 +59,14 @@ def updatePlayer(x,y):
     screen.blit(playrot, playpos)
     pygame.display.update()
     #updateServer() or something similar here
+
+class Square:
+    def __init__(self, color, x, y, width, height, speed):
+        self.rect = pygame.Rect(x,y,width,height)
+        self.color = color
+        self.speed = speed
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.rect)
 
 class Enemy(Square):
     def __init__(self, color, x, y, width, height, tempspeed):
@@ -97,7 +82,6 @@ class Enemy(Square):
         self.y = self.y + self.dy       
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
-
 
 def rotate(surface,angle,width,height):
    rotated_surface = pygame.transform.rotozoom(surface,angle,1)
@@ -147,7 +131,7 @@ while running:
         if lastshot > tickrate/firerate:
             targetX, targetY = pygame.mouse.get_pos()
             #print(targetX,targetY) #comment this later
-            b = Bullet(red, (x), (y), 20, 4, 10, targetX, targetY)
+            b = Bullet(bulletImg, (x-8), (y-8), 10, targetX, targetY)
             bullets.append(b)
             lastshot = 0
 
@@ -163,9 +147,9 @@ while running:
             boostfuel += 1
     
     for b in bullets:
-        if b.rect.x > displaywidth or b.rect.x <= 0:
+        if b.x > displaywidth or b.x <= 0:
             bullets.remove(b)
-        elif b.rect.y > displayheight or b.rect.y <= 0:
+        elif b.y > displayheight or b.y <= 0:
             bullets.remove(b)
     lastshot+=1
     screen.fill(grey)
