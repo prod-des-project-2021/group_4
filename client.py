@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 from pygame.transform import rotate
 
 pygame.init()
@@ -20,9 +21,10 @@ angle = 0
 x = 50
 y = 50
 bullets = []
+enemies = []
 tickrate = 60
 lastshot = 0        
-firerate = 4        #shots per second
+firerate = 4        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
 width = 64
 height = 64
 basespeed = 4
@@ -53,10 +55,12 @@ class Bullet(Square):
     def __init__(self, color, x, y, width, height, speed, targetX, targetY):
         super().__init__(color, x, y, width, height, speed)
         angle = math.atan2(targetY-y, targetX-x) #radians
+        #  ^^  send to server whenever you are at that point
         self.dx = math.cos(angle)*speed
         self.dy = math.sin(angle)*speed
         self.x = x
         self.y = y
+
     def moveBullet(self):
         self.x = self.x + self.dx
         self.y = self.y + self.dy
@@ -66,6 +70,22 @@ class Bullet(Square):
 def updatePlayer(x2,y2):
     screen.blit(playerImg, (x2, y2))
     pygame.display.update()
+
+class Enemy(Square):
+    def __init__(self, color, x, y, width, height, tempspeed):
+        self.rect = pygame.Rect(x,y, width, height)
+        self.x = x
+        self.y = y
+        self.color = color
+
+    def moveEnemy(self):
+        self.dx = 0
+        self.dy = basespeed * slowmodifier    #here for testing only (get these from server at some point)
+        self.x = self.x + self.dx
+        self.y = self.y + self.dy
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
+
 
 running = True
 while running:
@@ -77,6 +97,12 @@ while running:
 
     buttons = pygame.key.get_pressed()
     mousebuttons = pygame.mouse.get_pressed()
+
+    #randomized enemies for testing purposes
+    if random.randint(1,60) == 1:
+        ex = random.randint(1, displaywidth - width)
+        e = Enemy(green, ex, 0, width, height, 4)
+        enemies.append(e)
 
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
         x += slowmodifier * vel
@@ -122,10 +148,17 @@ while running:
     for b in bullets:
         if b.rect.x > displaywidth or b.rect.x <= 0:
             bullets.remove(b)
-        elif b.rect.y >displayheight or b.rect.y <= 0:
+        elif b.rect.y > displayheight or b.rect.y <= 0:
             bullets.remove(b)
     lastshot+=1
     screen.fill(white)
+
+    for e in enemies:
+        e.moveEnemy()
+        e.draw(screen)
+        if e.rect.y > displayheight:
+            enemies.remove(e)
+
     for b in bullets:
         b.moveBullet()
         b.draw(screen)
