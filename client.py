@@ -31,6 +31,7 @@ enemies = []
 tickrate = 60
 lastshot = 0        
 firerate = 4        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
+bulletspeed = 10
 width = 64
 height = 64
 basespeed = 4
@@ -134,7 +135,7 @@ while running:
         if lastshot > tickrate/firerate:
             #targetX, targetY = pygame.mouse.get_pos()
             #print(targetX,targetY) #comment this later
-            b = Bullet(bulletImg, (x-9), (y-9), 10, -angle + math.pi/2 )
+            b = Bullet(bulletImg, (x-9), (y-9), bulletspeed, -angle + math.pi/2 )
             bullets.append(b)
             lastshot = 0
 
