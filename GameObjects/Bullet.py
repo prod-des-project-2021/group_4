@@ -9,6 +9,8 @@ class Bullet:
         self.image = pygame.transform.rotozoom(image, int(-1*self.angle*180/math.pi)-90, 1)
         self.dx = math.cos(self.angle)*speed
         self.dy = math.sin(self.angle)*speed
+        self.width = 16
+        self.height = 16
         self.x = x
         self.y = y
 
@@ -19,4 +21,5 @@ class Bullet:
     def moveBullet(self):
         self.x = self.x + self.dx
         self.y = self.y + self.dy
+        self.rect = self.image.get_rect(topleft=(self.x,self.y))
         

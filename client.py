@@ -72,6 +72,8 @@ class Square:
 class Enemy(Square):
     def __init__(self, color, x, y, width, height):
         self.rect = pygame.Rect(x,y, width, height)
+        self.width = width
+        self.height = height
         self.x = x
         self.y = y
         self.color = color
@@ -163,8 +165,11 @@ while running:
 
     for b in bullets:
         b.moveBullet()
+        for e in enemies:
+            if b.rect.colliderect(e.rect):
+                enemies.remove(e)
+                bullets.remove(b)
         b.draw(screen)
     updatePlayer(x,y)
 
-    
 pygame.quit()
