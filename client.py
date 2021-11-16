@@ -70,7 +70,7 @@ class Square:
         pygame.draw.rect(screen, self.color, self.rect)
 
 class Enemy(Square):
-    def __init__(self, color, x, y, width, height, tempspeed):
+    def __init__(self, color, x, y, width, height):
         self.rect = pygame.Rect(x,y, width, height)
         self.x = x
         self.y = y
@@ -103,7 +103,7 @@ while running:
     #randomized enemies for testing purposes
     if random.randint(1,60) == 1:
         ex = random.randint(1, displaywidth - width)
-        e = Enemy(green, ex, 0, width, height, 4)
+        e = Enemy(green, ex, 0, width, height)
         enemies.append(e)
 
     if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
