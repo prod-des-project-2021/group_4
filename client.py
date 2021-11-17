@@ -60,39 +60,12 @@ black = 0,0,0
 
 def updatePlayer():
     mousex,mousey = pygame.mouse.get_pos()
-    global goleft, goright, goforeward, angle, vel, x, y
+    global goforeward, angle, vel, x, y
 
-    if goforeward == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
-        if x > displaywidth - vel or y > displayheight - vel:
-            x -= vel + 16
-            y -= vel + 16
-        elif x < 0 + vel or y < 0 + vel:
-            x += vel + 16
-            y += vel + 16
-        else:
-            x += math.sin(angle) * vel
-            y += math.cos(angle) * vel
-        
-    if goleft == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
-        if x > displaywidth - vel or y > displayheight - vel:
-            x -= vel + 32
-            y -= vel + 32
-        elif x < 0 + vel or y < 0 + vel:
-            x += vel + 32
-            y += vel + 32
-        else:
-            x += math.sin(angle-80) * vel * slowmodifier
-            y += math.cos(angle-80) * vel * slowmodifier
-    if goright == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
-        if x > displaywidth - vel or y > displayheight - vel:
-            x -= vel + 32
-            y -= vel + 32
-        elif x < 0 + vel or y < 0 + vel:
-            x += vel + 32
-            y += vel + 32
-        else:
-            x += math.sin(angle+80) * vel * slowmodifier
-            y += math.cos(angle+80) * vel * slowmodifier
+    if goforeward == 1:
+        x += math.sin(angle) * vel
+        y += math.cos(angle) * vel
+    
     
     if x > displaywidth - vel or y > displayheight - vel:
             x -= vel + 32
@@ -165,15 +138,6 @@ while running:
         vel = basespeed
         if boostfuel < maxboostfuel:
             boostfuel += 1
-
-    if buttons[pygame.K_a]:
-        goleft = 1
-    else:
-        goleft = 0
-    if buttons[pygame.K_d]:
-        goright = 1
-    else:
-        goright = 0
     if buttons[pygame.K_w]:
         goforeward = 1
     else:
