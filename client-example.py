@@ -15,35 +15,28 @@ class Player:
         self.rotate() # initialize the rotated sprite
 
         self.velocity = 0.0
-        self.max_velocity = 3.0
+        self.max_velocity = 6.0
         self.velocity_increment = 0.25
         self.velocity_decrement_x = 0.05
         self.velocity_decrement_y = 0.05
 
     def draw(self, screen):
-        screen.blit(self.rotatedSprite, (int(self.x), int(self.y)))
+        screen.blit(self.rotatedSprite, (int(self.x-self.dimensions.width/2), int(self.y-self.dimensions.height/2)))
 
     def rotate(self):
         self.rotatedSprite = pygame.transform.rotate(self.sprite, int(self.angle)-90)
+        self.dimensions = self.rotatedSprite.get_rect()
 
     def setAngle(self,angle):
         self.angle = radToDec(angle)
 
     def update(self, accelerating):
         if(accelerating):
-
             self.xv = self.xv + math.sin(decToRad(self.angle)) * self.velocity_increment
             self.yv = self.yv + math.cos(decToRad(self.angle)) * self.velocity_increment
+            
 
-            #if(self.xv > self.max_velocity):
-                #self.xv = self.max_velocity
-            #if(self.yv > self.max_velocity):
-                #self.yv = self.max_velocity
-
-#            if(self.xv < -self.max_velocity):
-                #self.xv = -self.max_velocity
-            #if(self.yv < -self.max_velocity):
-                #self.yv = -self.max_velocity
+            print("xv: "+str(self.xv)+" yv: "+str(self.yv))
 
             self.velocity_decrement_x = abs(self.xv / 75)
             self.velocity_decrement_y = abs(self.yv / 75)
