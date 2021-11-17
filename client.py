@@ -2,6 +2,8 @@ import pygame
 import math
 import random
 
+from pygame.constants import JOYHATMOTION
+
 from GameObjects import Bullet
 
 from pygame import transform
@@ -39,8 +41,12 @@ boostmodifier = 2
 boostspeed = basespeed * boostmodifier
 boostfuel = 100
 maxboostfuel = 300
-slowmodifier = 0.4
+slowmodifier = 0.5
 vel = basespeed
+goforeward = 0
+gobackward = 0
+goleft = 0
+goright = 0
 
 #colors
 grey = 75,75,75
@@ -52,9 +58,49 @@ white = 255,255,255
 black = 0,0,0
 
 
-def updatePlayer(x,y):
+def updatePlayer():
     mousex,mousey = pygame.mouse.get_pos()
-    global angle 
+    global goleft, goright, goforeward, angle, vel, x, y
+
+    if goforeward == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
+        if x > displaywidth - vel or y > displayheight - vel:
+            x -= vel + 16
+            y -= vel + 16
+        elif x < 0 + vel or y < 0 + vel:
+            x += vel + 16
+            y += vel + 16
+        else:
+            x += math.sin(angle) * vel
+            y += math.cos(angle) * vel
+        
+    if goleft == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
+        if x > displaywidth - vel or y > displayheight - vel:
+            x -= vel + 32
+            y -= vel + 32
+        elif x < 0 + vel or y < 0 + vel:
+            x += vel + 32
+            y += vel + 32
+        else:
+            x += math.sin(angle-80) * vel * slowmodifier
+            y += math.cos(angle-80) * vel * slowmodifier
+    if goright == 1 and x > 0 + vel + 16 and x < displaywidth - vel - 16 and y > 0 + vel + 16 and y < displayheight - vel - 16:
+        if x > displaywidth - vel or y > displayheight - vel:
+            x -= vel + 32
+            y -= vel + 32
+        elif x < 0 + vel or y < 0 + vel:
+            x += vel + 32
+            y += vel + 32
+        else:
+            x += math.sin(angle+80) * vel * slowmodifier
+            y += math.cos(angle+80) * vel * slowmodifier
+    
+    if x > displaywidth - vel or y > displayheight - vel:
+            x -= vel + 32
+            y -= vel + 32
+    elif x < 0 + vel or y < 0 + vel:
+            x += vel + 32
+            y += vel + 32
+
     angle = math.atan2(mousex - x, mousey - y)
     playrot = pygame.transform.rotozoom(playerImg,int(angle*180/math.pi)-180,1)
     playpos = (x - playrot.get_rect().width/2,y - playrot.get_rect().height/2)
@@ -71,12 +117,12 @@ class Square:
         pygame.draw.rect(screen, self.color, self.rect)
 
 class Enemy(Square):
-    def __init__(self, color, x, y, width, height):
-        self.rect = pygame.Rect(x,y, width, height)
+    def __init__(self, color, ex, ey, width, height):
+        self.rect = pygame.Rect(ex,ey, width, height)
         self.width = width
         self.height = height
-        self.x = x
-        self.y = y
+        self.x = ex
+        self.y = ey
         self.color = color
 
     def moveEnemy(self):
@@ -109,36 +155,6 @@ while running:
         e = Enemy(green, ex, 0, width, height)
         enemies.append(e)
 
-    if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
-        x += slowmodifier * vel
-        y += slowmodifier * vel
-    if buttons[pygame.K_a] and buttons[pygame.K_s] and x > vel and y < displaywidth - height - vel:
-        x += slowmodifier * vel
-        y -= slowmodifier * vel   
-    if buttons[pygame.K_d] and buttons[pygame.K_w] and x < displaywidth - width + vel and y > vel:
-        x -= slowmodifier * vel
-        y += slowmodifier * vel
-    if buttons[pygame.K_d] and buttons[pygame.K_s] and x < displaywidth - width + vel and y< displaywidth - height - vel:
-        x -= slowmodifier * vel
-        y -= slowmodifier * vel
-    
-    if buttons[pygame.K_a] and x > vel:
-        x -= vel
-    if buttons[pygame.K_d] and x < displaywidth - width + vel:
-        x += vel
-    if buttons[pygame.K_w] and y > vel:
-        y -= vel
-    if buttons[pygame.K_s] and y < displaywidth - height - vel:
-        y += vel
-
-    if mousebuttons[0]:
-        if lastshot > tickrate/firerate:
-            #targetX, targetY = pygame.mouse.get_pos()
-            #print(targetX,targetY) #comment this later
-            b = Bullet(bulletImg, (x-9), (y-9), bulletspeed, -angle + math.pi/2 )
-            bullets.append(b)
-            lastshot = 0
-
     if buttons[pygame.K_SPACE]:
         if boostfuel > 0:
             vel = boostspeed
@@ -149,7 +165,28 @@ while running:
         vel = basespeed
         if boostfuel < maxboostfuel:
             boostfuel += 1
-    
+
+    if buttons[pygame.K_a]:
+        goleft = 1
+    else:
+        goleft = 0
+    if buttons[pygame.K_d]:
+        goright = 1
+    else:
+        goright = 0
+    if buttons[pygame.K_w]:
+        goforeward = 1
+    else:
+        goforeward = 0
+
+    if mousebuttons[0]:
+        if lastshot > tickrate/firerate:
+            #targetX, targetY = pygame.mouse.get_pos()
+            #print(targetX,targetY) #comment this later
+            b = Bullet(bulletImg, (x-9), (y-9), bulletspeed, -angle + math.pi/2 )
+            bullets.append(b)
+            lastshot = 0
+
     for b in bullets:
         if b.x > displaywidth or b.x <= 0:
             bullets.remove(b)
@@ -171,6 +208,7 @@ while running:
                 enemies.remove(e)
                 bullets.remove(b)
         b.draw(screen)
-    updatePlayer(x,y)
+
+    updatePlayer()
 
 pygame.quit()
