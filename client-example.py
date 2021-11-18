@@ -1,29 +1,39 @@
 import pygame
 import math
+from pygame.math import Vector2
+
+ZERO_X = 1920/2
+ZERO_Y = 1080/2
 
 class Player:
     def __init__(self, sprite):
         self.sprite = sprite
-        self.x = 150.0
-        self.y = 150.0
 
-        self.xv = 0.0
-        self.yv = 0.0
+        # rewritten movement with vectors
+        self.position = Vector2(150.0, 150.0)
+        self.UP = Vector2(0, 1)
+        self.direction = Vector2(0, 1)
+        self.velocity = Vector2(0, 0)
+        self.acceleration = 0.25
 
         self.angle = 0.0
         self.rotatedSprite = None
         self.rotate() # initialize the rotated sprite
 
-        self.velocity = 0.0
-        self.max_velocity = 6.0
-        self.velocity_increment = 0.25
-        self.velocity_decrement_x = 0.05
-        self.velocity_decrement_y = 0.05
+        self.max_velocity = 7.0
 
     def draw(self, screen):
-        screen.blit(self.rotatedSprite, (int(self.x-self.dimensions.width/2), int(self.y-self.dimensions.height/2)))
+        screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
+        pygame.draw.line(screen, (255,255,255), (ZERO_X, 0), (ZERO_X, ZERO_Y*2))
+        pygame.draw.line(screen, (255,255,255), (0, ZERO_Y), (ZERO_X*2, ZERO_Y))
+        pygame.draw.line(screen, (255,0,0), (ZERO_X, ZERO_Y), (ZERO_X+self.direction.x*50, ZERO_Y+self.direction.y*50))
+        pygame.draw.line(screen, (0,255,0), (ZERO_X, ZERO_Y), (ZERO_X+self.velocity.x*20, ZERO_Y+self.velocity.y*20))
+
 
     def rotate(self):
+        self.direction = Vector2(self.UP)
+        self.direction.rotate_ip(-self.angle)
+
         self.rotatedSprite = pygame.transform.rotate(self.sprite, int(self.angle)-90)
         self.dimensions = self.rotatedSprite.get_rect()
 
@@ -32,35 +42,24 @@ class Player:
 
     def update(self, accelerating):
         if(accelerating):
-            self.xv = self.xv + math.sin(decToRad(self.angle)) * self.velocity_increment
-            self.yv = self.yv + math.cos(decToRad(self.angle)) * self.velocity_increment
-            
+            # limiting the velocity
+            # guess it's little hacky but whatever
+            tempVelocity = Vector2(self.velocity)
+            tempVelocity += self.direction * self.acceleration
 
-            print("xv: "+str(self.xv)+" yv: "+str(self.yv))
-
-            self.velocity_decrement_x = abs(self.xv / 75)
-            self.velocity_decrement_y = abs(self.yv / 75)
+            # if incrementing velocity doesn't exceed max, allow it
+            if(tempVelocity.length() < self.max_velocity):
+                self.velocity += self.direction * self.acceleration
 
         else:
-            if(self.xv > 0):
-                self.xv = self.xv - self.velocity_decrement_x
-            if(self.xv < 0):
-                self.xv = self.xv + self.velocity_decrement_x
+            if(self.velocity.length() > 0):
+                # braking vector
+                braking = Vector2(0.15, 0.15)
+                rotation_angle = braking.angle_to(self.velocity)
+                braking.rotate_ip(rotation_angle)
+                self.velocity -= braking
 
-            if(self.yv > 0):
-                self.yv = self.yv - self.velocity_decrement_y
-            if(self.yv < 0):
-                self.yv = self.yv + self.velocity_decrement_y
-
-            # zero the velocity
-            if(self.xv < self.velocity_decrement_x and self.xv > -self.velocity_decrement_x):
-                self.xv = 0
-
-            if(self.yv < self.velocity_decrement_y and self.yv > -self.velocity_decrement_y):
-                self.yv = 0
-
-        self.x = self.x + self.xv
-        self.y = self.y + self.yv
+        self.position += self.velocity
         self.rotate()
 
 
@@ -72,7 +71,7 @@ def decToRad(dec):
 
 if __name__ == '__main__':
     pygame.init()
-    screen = pygame.display.set_mode((1024,768))
+    screen = pygame.display.set_mode((1024,768), pygame.RESIZABLE, vsync=1)
     clock = pygame.time.Clock()
 
     running = True
@@ -85,10 +84,10 @@ if __name__ == '__main__':
     mouseDown = False
 
     while(running):
-        clock.tick(60)
+
         # get mouse position
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        player_angle = math.atan2(mouse_x - player.x, mouse_y - player.y)
+        player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
         player.setAngle(player_angle)
 
         # draw stuff
@@ -98,7 +97,6 @@ if __name__ == '__main__':
         # update stuff
         player.update(mouseDown)
 
-        pygame.display.update()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -106,3 +104,6 @@ if __name__ == '__main__':
                 mouseDown = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouseDown = False
+
+        clock.tick(60)
+        pygame.display.flip()
