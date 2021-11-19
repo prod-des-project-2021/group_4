@@ -159,7 +159,7 @@ if __name__ == '__main__':
         for e in enemies:
             e.moveEnemy()
             e.draw(screen)
-            if e.rect.y > displayheight:
+            if e.rect.y > pygame.display.Info().current_h:
                 enemies.remove(e)
 
 
