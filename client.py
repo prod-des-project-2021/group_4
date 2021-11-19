@@ -33,7 +33,7 @@ bullets = []
 enemies = []
 tickrate = 120
 lastshot = 0        
-firerate = 4        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
+firerate = 2        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
 bulletspeed = 8
 width = 64
 height = 64
@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
         #randomized enemies for testing purposes
         if random.randint(1,60) == 1:
-            ex = random.randint(1, displaywidth - width)
+            ex = random.randint(1, pygame.display.Info().current_w - width)
             e = Enemy(green, ex, 0, width, height)
             enemies.append(e)
 
@@ -140,9 +140,9 @@ if __name__ == '__main__':
                 lastshot = 0
 
         for b in bullets:
-            if b.x > displaywidth or b.x <= 0:
+            if b.x > pygame.display.Info().current_w or b.x <= 0:
                 bullets.remove(b)
-            elif b.y > displayheight or b.y <= 0:
+            elif b.y > pygame.display.Info().current_h or b.y <= 0:
                 bullets.remove(b)
         lastshot+=1
         

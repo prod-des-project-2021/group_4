@@ -51,13 +51,13 @@ class Player:
         self.UP = Vector2(0, 1)
         self.direction = Vector2(0, 1)
         self.velocity = Vector2(0, 0)
-        self.acceleration = 0.1
+        self.acceleration = 0.05
 
         self.angle = 0.0
         self.rotatedSprite = None
         self.rotate() # initialize the rotated sprite
 
-        self.max_velocity = 7.0
+        self.max_velocity = 4.0
         
 
     def draw(self, screen):
