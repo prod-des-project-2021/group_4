@@ -2,8 +2,10 @@ import pygame
 import math
 import random
 
-from pygame.constants import JOYHATMOTION
 
+from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
+
+from GameObjects import Player
 from GameObjects import Bullet
 
 from pygame import transform
@@ -14,39 +16,31 @@ pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
 #resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
-displaywidth = 900
-displayheight = 900
+displaywidth = 1024
+displayheight = 768
 screen = pygame.display.set_mode((displaywidth, displayheight))
-clock = pygame.time.Clock()
+
 
 #Caption
 pygame.display.set_caption("Multiplayer Game")
 
 #Player values
-playerImg = pygame.image.load('player2.png')
-bulletImg = pygame.image.load('bullet2.png')
 angle = 0
-x = 50
-y = 50
+#x = 50
+#y = 50
 bullets = []
 enemies = []
 tickrate = 60
 lastshot = 0        
 firerate = 4        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
-bulletspeed = 10
+bulletspeed = 8
 width = 64
 height = 64
 basespeed = 4
-boostmodifier = 2
-boostspeed = basespeed * boostmodifier
-boostfuel = 100
-maxboostfuel = 300
 slowmodifier = 0.5
-vel = basespeed
-goforeward = 0
-gobackward = 0
-goleft = 0
-goright = 0
+#vel = basespeed
+
+
 
 #colors
 grey = 75,75,75
@@ -57,29 +51,6 @@ yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
 
-
-def updatePlayer():
-    mousex,mousey = pygame.mouse.get_pos()
-    global goforeward, angle, vel, x, y
-
-    if goforeward == 1:
-        x += math.sin(angle) * vel
-        y += math.cos(angle) * vel
-    
-    
-    if x > displaywidth - vel or y > displayheight - vel:
-            x -= vel + 32
-            y -= vel + 32
-    elif x < 0 + vel or y < 0 + vel:
-            x += vel + 32
-            y += vel + 32
-
-    angle = math.atan2(mousex - x, mousey - y)
-    playrot = pygame.transform.rotozoom(playerImg,int(angle*180/math.pi)-180,1)
-    playpos = (x - playrot.get_rect().width/2,y - playrot.get_rect().height/2)
-    screen.blit(playrot, playpos)
-    pygame.display.update()
-    #updateServer() or something similar here
 
 class Square:
     def __init__(self, color, x, y, width, height, speed):
@@ -111,68 +82,80 @@ def rotate(surface,angle,width,height):
    rotated_rect = rotated_surface.get_rect(center = (width,height))
    return rotated_surface, rotated_rect
 
-running = True
-while running:
-    clock.tick(tickrate)
+if __name__ == '__main__':
+    pygame.init()
+    screen = pygame.display.set_mode((displaywidth,displayheight), pygame.RESIZABLE, vsync=1)
+    clock = pygame.time.Clock()
+
+    running = True
+
+    playerImg = pygame.image.load('player.png')
+    bulletImg = pygame.image.load('bullet.png')
+    player = Player(playerImg)
+
     
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    while(running):
+        clock.tick(tickrate)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
+       
+        player.setAngle(player_angle)
+        mousebuttons = pygame.mouse.get_pressed()
 
-    buttons = pygame.key.get_pressed()
-    mousebuttons = pygame.mouse.get_pressed()
+        screen.fill(black)
+        player.draw(screen)
+        
 
-    #randomized enemies for testing purposes
-    if random.randint(1,60) == 1:
-        ex = random.randint(1, displaywidth - width)
-        e = Enemy(green, ex, 0, width, height)
-        enemies.append(e)
+        player.update(mousebuttons[2])
 
-    if buttons[pygame.K_SPACE]:
-        if boostfuel > 0:
-            vel = boostspeed
-            boostfuel -= 2
-        else:
-            vel = basespeed
-    else:
-        vel = basespeed
-        if boostfuel < maxboostfuel:
-            boostfuel += 1
-    if buttons[pygame.K_w]:
-        goforeward = 1
-    else:
-        goforeward = 0
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouseDown = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouseDown = False
 
-    if mousebuttons[0]:
-        if lastshot > tickrate/firerate:
-            #targetX, targetY = pygame.mouse.get_pos()
-            #print(targetX,targetY) #comment this later
-            b = Bullet(bulletImg, (x-9), (y-9), bulletspeed, -angle + math.pi/2 )
-            bullets.append(b)
-            lastshot = 0
+        #randomized enemies for testing purposes
+        if random.randint(1,60) == 1:
+            ex = random.randint(1, displaywidth - width)
+            e = Enemy(green, ex, 0, width, height)
+            enemies.append(e)
 
-    for b in bullets:
-        if b.x > displaywidth or b.x <= 0:
-            bullets.remove(b)
-        elif b.y > displayheight or b.y <= 0:
-            bullets.remove(b)
-    lastshot+=1
-    screen.fill(grey)
+        if mousebuttons[0]:
+            if lastshot > tickrate/firerate:
+                #targetX, targetY = pygame.mouse.get_pos()
+                #print(targetX,targetY) #comment this later
+                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle + math.pi/2 )
+                bullets.append(b)
+                lastshot = 0
 
-    for e in enemies:
-        e.moveEnemy()
-        e.draw(screen)
-        if e.rect.y > displayheight:
-            enemies.remove(e)
-
-    for b in bullets:
-        b.moveBullet()
-        for e in enemies:
-            if b.rect.colliderect(e.rect):
-                enemies.remove(e)
+        for b in bullets:
+            if b.x > displaywidth or b.x <= 0:
                 bullets.remove(b)
-        b.draw(screen)
+            elif b.y > displayheight or b.y <= 0:
+                bullets.remove(b)
+        lastshot+=1
+        
+        
+        for b in bullets:
+            b.moveBullet()
+            for e in enemies:
+                if b.rect.colliderect(e.rect):
+                    enemies.remove(e)
+                    bullets.remove(b)
+                    b.draw(screen)
 
-    updatePlayer()
+        for e in enemies:
+            e.moveEnemy()
+            e.draw(screen)
+            if e.rect.y > displayheight:
+                enemies.remove(e)
+
+
+
+        clock.tick(tickrate)
+        pygame.display.flip()
 
 pygame.quit()
