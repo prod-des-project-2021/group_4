@@ -1,45 +1,57 @@
 import pygame
 import math
+import random
+
+
+from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
+
+from GameObjects import Player
+from GameObjects import Bullet
+from GameObjects import ParticleEmitter
+
+from pygame import transform
+from pygame.draw import rect
 from pygame.transform import rotate
 
 pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
 #resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
-displaywidth = 900
-displayheight = 900
+displaywidth = 1024
+displayheight = 768
 screen = pygame.display.set_mode((displaywidth, displayheight))
-clock = pygame.time.Clock()
+
 
 #Caption
 pygame.display.set_caption("Multiplayer Game")
 
 #Player values
-playerImg = pygame.image.load('player.png')
 angle = 0
-x = 50
-y = 50
+#x = 50
+#y = 50
 bullets = []
-tickrate = 60
+enemies = []
+tickrate = 120
 lastshot = 0        
-firerate = 4        #shots per second
+firerate = 2        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
+bulletspeed = 8
 width = 64
 height = 64
 basespeed = 4
-boostmodifier = 2
-boostspeed = basespeed * boostmodifier
-boostfuel = 100
-maxboostfuel = 300
-slowmodifier = 0.4
-vel = basespeed
+slowmodifier = 0.5
+#vel = basespeed
+
+
 
 #colors
+grey = 75,75,75
 green = 0,255,0
 red = 255,0,0
 blue = 0,0,255
 yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
+
 
 class Square:
     def __init__(self, color, x, y, width, height, speed):
@@ -49,86 +61,110 @@ class Square:
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, self.rect)
 
-class Bullet(Square):
-    def __init__(self, color, x, y, width, height, speed, targetX, targetY):
-        super().__init__(color, x, y, width, height, speed)
-        angle = math.atan2(targetY-y, targetX-x) #radians
-        self.dx = math.cos(angle)*speed
-        self.dy = math.sin(angle)*speed
-        self.x = x
-        self.y = y
-    def moveBullet(self):
+class Enemy(Square):
+    def __init__(self, color, ex, ey, width, height):
+        self.rect = pygame.Rect(ex,ey, width, height)
+        self.width = width
+        self.height = height
+        self.x = ex
+        self.y = ey
+        self.color = color
+
+    def moveEnemy(self):
+        self.dx = 0                           #most of these are useless when we get other players from server
+        self.dy = basespeed * slowmodifier    #here for testing only (get these from server at some point)
         self.x = self.x + self.dx
-        self.y = self.y + self.dy
+        self.y = self.y + self.dy       
         self.rect.x = int(self.x)
         self.rect.y = int(self.y)
 
-def updatePlayer(x2,y2):
-    screen.blit(playerImg, (x2, y2))
-    pygame.display.update()
+def rotate(surface,angle,width,height):
+   rotated_surface = pygame.transform.rotozoom(surface,angle,1)
+   rotated_rect = rotated_surface.get_rect(center = (width,height))
+   return rotated_surface, rotated_rect
 
-running = True
-while running:
-    clock.tick(tickrate)
+if __name__ == '__main__':
+    pygame.init()
+    screen = pygame.display.set_mode((displaywidth,displayheight), pygame.RESIZABLE, vsync=1)
+    clock = pygame.time.Clock()
+
+    running = True
+
+    playerImg = pygame.image.load('res/player.png')
+    enemyImg = pygame.image.load('res/enemy.png')
+    engineTrailImg = pygame.image.load('res/engine_trail_particle.png')
+    bulletImg = pygame.image.load('res/ammo_small.png')
+
+    player = Player(playerImg)
+    playerEngineTrail = ParticleEmitter(engineTrailImg)
+
     
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    while(running):
+        Player.ZERO_X = pygame.display.Info().current_w /  2
+        Player.ZERO_Y = pygame.display.Info().current_h /  2
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
+        player.setAngle(player_angle)
+        mousebuttons = pygame.mouse.get_pressed()
 
-    buttons = pygame.key.get_pressed()
-    mousebuttons = pygame.mouse.get_pressed()
+        screen.fill(black)
+        playerEngineTrail.draw(screen)
+        player.draw(screen)
+        
+        
+        playerEngineTrail.updatePosition(player.position.x, player.position.y)
+        if mousebuttons[2]:
+            playerEngineTrail.addParticle(15, -player.direction*5)
+        player.update(mousebuttons[2])   
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouseDown = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouseDown = False
 
-    if buttons[pygame.K_a] and buttons[pygame.K_w] and x > vel and y > vel:
-        x += slowmodifier * vel
-        y += slowmodifier * vel
-    if buttons[pygame.K_a] and buttons[pygame.K_s] and x > vel and y < displaywidth - height - vel:
-        x += slowmodifier * vel
-        y -= slowmodifier * vel   
-    if buttons[pygame.K_d] and buttons[pygame.K_w] and x < displaywidth - width + vel and y > vel:
-        x -= slowmodifier * vel
-        y += slowmodifier * vel
-    if buttons[pygame.K_d] and buttons[pygame.K_s] and x < displaywidth - width + vel and y< displaywidth - height - vel:
-        x -= slowmodifier * vel
-        y -= slowmodifier * vel
-    
-    if buttons[pygame.K_a] and x > vel:
-        x -= vel
-    if buttons[pygame.K_d] and x < displaywidth - width + vel:
-        x += vel
-    if buttons[pygame.K_w] and y > vel:
-        y -= vel
-    if buttons[pygame.K_s] and y < displaywidth - height - vel:
-        y += vel
+        #randomized enemies for testing purposes
+        if random.randint(1,60) == 1:
+            ex = random.randint(1, pygame.display.Info().current_w - width)
+            e = Enemy(green, ex, 0, width, height)
+            enemies.append(e)
 
-    if mousebuttons[0]:
-        if lastshot > tickrate/firerate:
-            targetX, targetY = pygame.mouse.get_pos()
-            #print(targetX,targetY) #comment this later
-            b = Bullet(red, (x+width/2), (y+height/2), 20, 20, 10, targetX, targetY)
-            bullets.append(b)
-            lastshot = 0
+        if mousebuttons[0]:
+            if lastshot > tickrate/firerate:
+                #targetX, targetY = pygame.mouse.get_pos()
+                #print(targetX,targetY) #comment this later
+                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
+                bullets.append(b)
+                lastshot = 0
 
-    if buttons[pygame.K_SPACE]:
-        if boostfuel > 0:
-            vel = boostspeed
-            boostfuel -= 2
-        else:
-            vel = basespeed
-    else:
-        vel = basespeed
-        if boostfuel < maxboostfuel:
-            boostfuel += 1
-    
-    for b in bullets:
-        if b.rect.x > displaywidth or b.rect.x <= 0:
-            bullets.remove(b)
-        elif b.rect.y >displayheight or b.rect.y <= 0:
-            bullets.remove(b)
-    lastshot+=1
-    screen.fill(white)
-    for b in bullets:
-        b.moveBullet()
-        b.draw(screen)
-    updatePlayer(x,y)
-    
+        for b in bullets:
+            if b.x > pygame.display.Info().current_w or b.x <= 0:
+                bullets.remove(b)
+            elif b.y > pygame.display.Info().current_h or b.y <= 0:
+                bullets.remove(b)
+        lastshot+=1
+        
+        
+        for b in bullets:
+            b.moveBullet()
+            b.draw(screen)
+            for e in enemies:
+                if b.rect.colliderect(e.rect):
+                    enemies.remove(e)
+                    bullets.remove(b)
+                    
+
+        for e in enemies:
+            e.moveEnemy()
+            e.draw(screen)
+            if e.rect.y > pygame.display.Info().current_h:
+                enemies.remove(e)
+
+
+
+        clock.tick(tickrate)
+        pygame.display.flip()
+
 pygame.quit()
