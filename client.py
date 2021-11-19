@@ -7,6 +7,7 @@ from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
 
 from GameObjects import Player
 from GameObjects import Bullet
+from GameObjects import ParticleEmitter
 
 from pygame import transform
 from pygame.draw import rect
@@ -30,7 +31,7 @@ angle = 0
 #y = 50
 bullets = []
 enemies = []
-tickrate = 60
+tickrate = 120
 lastshot = 0        
 firerate = 4        #shots per second (keep under tickrate since maximum amount of bullets created per tick is one)
 bulletspeed = 8
@@ -89,25 +90,32 @@ if __name__ == '__main__':
 
     running = True
 
-    playerImg = pygame.image.load('player.png')
-    bulletImg = pygame.image.load('bullet.png')
+    playerImg = pygame.image.load('res/player.png')
+    enemyImg = pygame.image.load('res/enemy.png')
+    engineTrailImg = pygame.image.load('res/engine_trail_particle.png')
+    bulletImg = pygame.image.load('res/ammo_small.png')
+
     player = Player(playerImg)
+    playerEngineTrail = ParticleEmitter(engineTrailImg)
 
     
     while(running):
-        clock.tick(tickrate)
+        Player.ZERO_X = pygame.display.Info().current_w /  2
+        Player.ZERO_Y = pygame.display.Info().current_h /  2
         mouse_x, mouse_y = pygame.mouse.get_pos()
         player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
-       
         player.setAngle(player_angle)
         mousebuttons = pygame.mouse.get_pressed()
 
         screen.fill(black)
+        playerEngineTrail.draw(screen)
         player.draw(screen)
         
-
-        player.update(mousebuttons[2])
-
+        
+        playerEngineTrail.updatePosition(player.position.x, player.position.y)
+        if mousebuttons[2]:
+            playerEngineTrail.addParticle(15, -player.direction*5)
+        player.update(mousebuttons[2])   
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -127,7 +135,7 @@ if __name__ == '__main__':
             if lastshot > tickrate/firerate:
                 #targetX, targetY = pygame.mouse.get_pos()
                 #print(targetX,targetY) #comment this later
-                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle + math.pi/2 )
+                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
                 bullets.append(b)
                 lastshot = 0
 
@@ -141,11 +149,12 @@ if __name__ == '__main__':
         
         for b in bullets:
             b.moveBullet()
+            b.draw(screen)
             for e in enemies:
                 if b.rect.colliderect(e.rect):
                     enemies.remove(e)
                     bullets.remove(b)
-                    b.draw(screen)
+                    
 
         for e in enemies:
             e.moveEnemy()

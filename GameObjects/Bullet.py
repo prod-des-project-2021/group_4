@@ -4,11 +4,11 @@ import pygame
 
 class Bullet:
     def __init__(self, image, x, y, speed, angle):
-        self.angle = angle
+        self.angle = angle+90
         #  ^^  send bullet angle to server whenever you are at that point
-        self.image = pygame.transform.rotozoom(image, int(-1*self.angle*180/math.pi)-90, 1)
-        self.dx = math.cos(self.angle)*speed
-        self.dy = math.sin(self.angle)*speed
+        self.image = pygame.transform.rotozoom(image, int(-1*self.angle), 1)
+        self.dx = math.cos(self.angle/180*math.pi)*speed
+        self.dy = math.sin(self.angle/180*math.pi)*speed
         self.width = 16
         self.height = 16
         self.x = x

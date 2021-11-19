@@ -1,20 +1,57 @@
 import pygame
 import math
 from pygame.math import Vector2
+import random
 
 ZERO_X = 1920/2
 ZERO_Y = 1080/2
+
+class ParticleEmitter:
+    def __init__(self, sprite):
+        self.sprite = sprite
+        self.particles = list()
+        self.x = 0
+        self.y = 0
+
+    def updatePosition(self, x, y):
+        self.x = x
+        self.y = y
+
+    def draw(self, screen):
+        for particle in self.particles:
+            particle.lifetime = particle.lifetime - 1
+            if particle.lifetime == 0:
+                self.particles.remove(particle)
+            particle.draw(screen)
+
+    def addParticle(self, lifetime, velocity):
+        self.particles.append(Particle(self.sprite, self.x, self.y, lifetime, velocity))
+
+class Particle:
+    def __init__(self, sprite, position_x, position_y, lifetime, velocity):
+        self.sprite = sprite.copy()
+        self.dimensions = sprite.get_rect()
+        self.lifetime = lifetime
+        self.total_lifetime = lifetime
+        self.position = Vector2(position_x-self.dimensions.width/2, position_y-self.dimensions.height/2)
+        self.velocity = Vector2(velocity)
+        self.velocity.rotate_ip(random.randint(1,20))
+
+    def draw(self, screen):
+        self.position += self.velocity
+        self.sprite.set_alpha(self.lifetime/self.total_lifetime*255)
+        screen.blit(self.sprite, (int(self.position.x), int(self.position.y)))
 
 class Player:
     def __init__(self, sprite):
         self.sprite = sprite
        
         # rewritten movement with vectors
-        self.position = Vector2(150.0, 150.0)
+        self.position = Vector2(ZERO_X, ZERO_Y)
         self.UP = Vector2(0, 1)
         self.direction = Vector2(0, 1)
         self.velocity = Vector2(0, 0)
-        self.acceleration = 0.25
+        self.acceleration = 0.1
 
         self.angle = 0.0
         self.rotatedSprite = None
@@ -34,8 +71,7 @@ class Player:
     def rotate(self):
         self.direction = Vector2(self.UP)
         self.direction.rotate_ip(-self.angle)
-
-        self.rotatedSprite = pygame.transform.rotate(self.sprite, int(self.angle)-180)
+        self.rotatedSprite = pygame.transform.rotate(self.sprite, int(self.angle)-90)
         self.dimensions = self.rotatedSprite.get_rect()
 
     def setAngle(self,angle):
@@ -59,6 +95,10 @@ class Player:
                 rotation_angle = braking.angle_to(self.velocity)
                 braking.rotate_ip(rotation_angle)
                 self.velocity -= braking
+
+                # if velocity is smaller than braking, just zero it
+                if(self.velocity.length() < braking.length()):
+                    self.velocity = Vector2(0,0)    
 
         self.position += self.velocity
         self.rotate()
