@@ -1,3 +1,5 @@
 #Package: networking
-from .service import Service
-from .packet import Packet
+from .service2 import Service
+from .clienthandler2 import ClientHandler
+from .packet2 import Packet
+from .client2 import Client

@@ -5,8 +5,10 @@
 import socket
 import threading
 import time
+import random
+
 from queue import Queue
-from .packet import Packet
+from .packet2 import Packet
 from .clienthandler2 import ClientHandler
 
 class Service:
@@ -133,8 +135,12 @@ class Service:
             # sending all packets to clients
             self.forwardPackets()
 
+            # processing all the clients
             for client in self.clients:
-                client.process()
+                if(not client.process()):
+                    # handle timeout
+                    print("CLIENT TIMEOUT: "+str(client.id))
+                    self.clients.remove(client)
 
     # Goes through the inputBuffer
     # and sent the packets to the clients
@@ -159,8 +165,9 @@ class Service:
             # if client is new, add a new
             # handler to the clients list
             if(existingClient == False):
-                print("NEW CLIENT "+str(rawAddr))
+
                 client = ClientHandler(self, rawAddr)
+                print("NEW CLIENT: "+str(client.id))
                 client.receive(rawPayload)
                 self.clients.append(client)
 
@@ -184,3 +191,20 @@ class Service:
         packet.setType(0)
         self.socket.sendto(packet.encode(), (self.addr, self.port))
         print("Socket closed")
+
+
+    def generateClientId(self):
+        # ihanata purkkaa
+        reserved = False
+        while(True):
+            id = random.randint(10000,65536)
+
+            for client in self.clients:
+                if client.id == id:
+                    reserved = True
+                    break
+
+            if(reserved == False):
+                break
+
+        return id
