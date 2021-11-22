@@ -2,7 +2,9 @@ import struct
 
 class Packet():
     def __init__(self):
-        self.header = "SPUDP01"
+        self.addr = None
+        self.port = None
+        self.header = "SP"
         self.priority = 0
         self.seq     = 0
         self.type    = 0
@@ -10,30 +12,38 @@ class Packet():
         self.payloadLength = 1
         self.packetLength = 0
 
-        # packet priority
-        # 0 - don't care
-        # 1 - must be ACKED
+    def setPriority(self, priority):
+        self.priority = priority
+
+    def setSequence(self, seq):
+        self.seq = seq
+
+    def setType(self, type):
+        self.type = type
+
+    def setDestination(self, addr, port):
+        self.addr = addr
+        self.port = port
 
     def setPayload(self, payload):
         self.payload = payload
         self.payloadLength = len(payload)
         if(self.payloadLength > 1024):
             print("PACKET LIMIT EXCEEDED!")
-
         self.calculatePacketSize()
 
     def calculatePacketSize(self):
-        size = struct.calcsize('7s h i h i')
+        size = struct.calcsize('2s h i h i')
         size = size + self.payloadLength
         self.packetLength = size
 
     def decode(self, raw):
 
         # fcalculating the size of the static part of the packet
-        staticSize = struct.calcsize('7s h i h i')
+        staticSize = struct.calcsize('2s h i h i')
 
         # decoding the static part
-        decodedPacket = struct.unpack_from('7s h i h i', raw)
+        decodedPacket = struct.unpack_from('2s h i h i', raw, 0)
 
         self.header         = decodedPacket[0].decode()
         self.priority       = decodedPacket[1]
@@ -48,7 +58,7 @@ class Packet():
         self.calculatePacketSize()
 
     def encode(self):
-        format = '7s h i h i '+str(self.payloadLength)+'s'
+        format = '2s h i h i '+str(self.payloadLength)+'s'
         encodedPacket = struct.pack(format,
             bytes(self.header, "utf-8"),
             self.priority,

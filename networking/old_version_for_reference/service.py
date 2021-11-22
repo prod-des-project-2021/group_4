@@ -2,6 +2,7 @@
 import socket
 import threading
 import time
+import pprint
 
 from .clienthandler import ClientHandler
 from .packet import Packet
@@ -24,7 +25,7 @@ class Service(threading.Thread):
         # server events
         self.onConnect    = None
         self.onDisconnect = None
-        self.onTimeOut    = None
+        self.onTimeout    = None
         self.onReconnect  = None
         self.onReceive    = None
 
@@ -57,8 +58,8 @@ class Service(threading.Thread):
                 dispatchPacket.start()
 
             except socket.error:
-                print("Socket encountered an error!")
-                self.running = False
+                pass
+                #self.running = False
 
     def stop(self):
         self.running = False
@@ -105,6 +106,8 @@ class Service(threading.Thread):
                 self.running = False
                 print("Stopping the server")
                 self.breakOutSocket()
+            elif command == "monitor":
+                print("Starting server monitor")
             else:
                 print("Command not found")
 
