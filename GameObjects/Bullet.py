@@ -1,7 +1,6 @@
 import math
 import pygame
 
-
 class Bullet:
     def __init__(self, image, x, y, speed, angle):
         self.angle = angle+90
@@ -16,7 +15,6 @@ class Bullet:
 
     def draw(self,screen):
         screen.blit(self.image,(self.x,self.y))
-
 
     def moveBullet(self):
         self.x = self.x + self.dx
