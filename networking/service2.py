@@ -7,6 +7,7 @@ import threading
 import time
 from queue import Queue
 from .packet import Packet
+from .clienthandler2 import ClientHandler
 
 class Service:
     def __init__(self, addr, port):
@@ -26,6 +27,7 @@ class Service:
         # client list
         self.clients = list()
         self.counter = 0
+
         # server event hooks
         self.onConnect      = None
         self.onReceive      = None
@@ -85,6 +87,9 @@ class Service:
             if command == "exit":
                 print("Stopping the server")
                 self.stop()
+            elif command == "clients":
+                for client in self.clients:
+                    print("Client: "+str(client.addr))
             elif command == "test1":
                 n = int(input("Number of test packets: "))
                 start = time.time()* 1000
@@ -107,8 +112,6 @@ class Service:
             try:
                 packet = self.socket.recvfrom(self.bufferSize)
                 self.inputBuffer.put(packet)
-                counter = counter + 1
-                print(str(counter))
             except socket.error:
                 print("Server socket encountered an error")
                 self.running = False
@@ -116,11 +119,12 @@ class Service:
     # Sending thread
     def sender(self):
         while(self.running):
-            time.sleep(0.05)
+            time.sleep(0.01)
             # processing the outputBuffer
-            while not self.outputBuffer.empty():
-                packet = self.outputBuffer.get()
-                self.socket.sendto(packet.encode(), (packet.addr, packet.port))
+            for client in self.clients:
+                while not client.outputBuffer.empty():
+                    packet = client.outputBuffer.get()
+                    self.socket.sendto(packet.encode(), client.addr)
 
     # Process clients
     def processor(self):
@@ -130,7 +134,7 @@ class Service:
             self.forwardPackets()
 
             for client in self.clients:
-                pass
+                client.process()
 
     # Goes through the inputBuffer
     # and sent the packets to the clients
@@ -138,16 +142,27 @@ class Service:
     def forwardPackets(self):
 
         while not self.inputBuffer.empty():
-            self.counter = self.counter + 1
-            rawPacket = self.inputBuffer.get()
-            # extracting packet information
-            rawPayload = rawPacket[0]
-            rawAddr    = rawPacket[1][0]
-            rawPort    = rawPacket[1][1]
 
-            packet = Packet()
-            packet.setDestination(rawAddr, rawPort)
-            packet.decode(rawPayload)
+            rawPacket = self.inputBuffer.get()
+            rawPayload = rawPacket[0]
+            rawAddr    = rawPacket[1]
+
+            # checking if we have already
+            # received data from the client
+            existingClient = False
+            for client in self.clients:
+                if(client.addr == rawAddr):
+                    client.receive(rawPayload)
+                    existingClient = True
+                    break
+
+            # if client is new, add a new
+            # handler to the clients list
+            if(existingClient == False):
+                print("NEW CLIENT "+str(rawAddr))
+                client = ClientHandler(self, rawAddr)
+                client.receive(rawPayload)
+                self.clients.append(client)
 
 
 
