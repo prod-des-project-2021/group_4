@@ -20,6 +20,16 @@ class ClientHandler:
         self.timeout    = 0 # when last packet was received
         self.id         = service.generateClientId() # each client must have unique id
 
+        # useful numbers
+        self.received_packets = 0
+        self.sent_packets = 0
+        self.received_data = 0
+
+        self.packets_in_per_sec = 0
+        self.packets_out_per_sec = 0
+        self.data_per_sec = 0
+
+        self.last_process = time.perf_counter()
 
     ###########################################
     # Sending packets to the client(global)   #
@@ -27,6 +37,8 @@ class ClientHandler:
     # to clients outputBuffer                 #
     ###########################################
     def send(self, packet):
+        self.sent_packets += 1
+
         packet.seq = self.seqOut
         self.seqOut = self.seqOut + 1
         self.outputBuffer.put(packet)
@@ -37,6 +49,8 @@ class ClientHandler:
     # form through this function          #
     #######################################
     def receive(self, raw): # Receiving raw data, must be decoded
+        self.received_packets += 1
+        self.received_data += len(raw)
 
         # setting the time when packet is received
         self.timeout = time.perf_counter()
@@ -89,12 +103,31 @@ class ClientHandler:
     # with return value(False = timeout)      #
     ###########################################
     def process(self):
+        self.calculateStatistics()
+
         while not self.inputBuffer.empty():
             packet = self.inputBuffer.get()
-            print(packet.seq)
+
         # if client has timed out, return false
         # and give control to the main thread
         if(time.perf_counter() > self.timeout + 5.0):
             return False
 
         return True
+
+    ####################
+    # Helper functions #
+    ####################
+
+    def calculateStatistics(self):
+        # processing the numbers
+        if(time.perf_counter() > self.last_process + 1.0):
+            self.data_per_sec = self.received_data
+            self.packets_out_per_sec = self.sent_packets
+            self.packets_in_per_sec = self.received_packets
+
+            self.received_data = 0
+            self.sent_packets = 0
+            self.received_packets = 0
+
+            self.last_process = time.perf_counter()

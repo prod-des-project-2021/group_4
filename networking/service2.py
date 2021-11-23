@@ -18,10 +18,7 @@ class Service:
         self.socket = None
         self.addr = addr
         self.port = port
-        self.bufferSize = 8192
-
-        # buffer for outgoing packets
-        self.outputBuffer = Queue()
+        self.bufferSize = 1024*4
 
         # buffer for input packets
         self.inputBuffer = Queue()
@@ -83,7 +80,7 @@ class Service:
     # Command thread
     def io(self):
         while(self.running):
-            time.sleep(0.02)
+            time.sleep(0.2)
 
             command = input()
             if command == "exit":
@@ -95,7 +92,8 @@ class Service:
                     print("No clients connected")
                 else:
                     for client in self.clients:
-                        print("Client(id: "+str(client.id)+", addr: "+str(client.addr)+")")
+                        print("==== Client(id: "+str(client.id)+", addr: "+str(client.addr)+") ====")
+                        print("Data in: "+str(client.data_per_sec/1000)+" KB/s, Packets out: "+str(client.packets_out_per_sec)+"/s, Packets in: "+str(client.packets_in_per_sec)+"/s")
 
             elif command == "stat":
                 print("Received "+str(self.counter)+" packets")
@@ -104,9 +102,7 @@ class Service:
 
     # Receiving thread
     def receiver(self):
-        counter = 0
         while(self.running):
-            time.sleep(0.02)
             try:
                 packet = self.socket.recvfrom(self.bufferSize)
                 self.inputBuffer.put(packet)
@@ -127,7 +123,7 @@ class Service:
     # Process clients
     def processor(self):
         while(self.running):
-            time.sleep(0.02)
+            time.sleep(0.01)
             # sending all packets to clients
             self.forwardPackets()
 
