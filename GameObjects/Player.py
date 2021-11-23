@@ -95,6 +95,19 @@ class Player:
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
                     self.velocity = Vector2(0,0)    
+        #restricting player position
+        if self.position.x >= 1920:
+            self.velocity = Vector2(0,0)
+            self.position.x -= 20
+        if self.position.y >= 1080:
+            self.velocity = Vector2(0,0)
+            self.position.y -= 20
+        if self.position.x <= 0:
+            self.velocity = Vector2(0,0)
+            self.position.x += 20
+        if self.position.y <= 0:
+            self.velocity = Vector2(0,0)
+            self.position.y += 20
 
         self.position += self.velocity
         self.rotate()
