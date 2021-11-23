@@ -89,19 +89,14 @@ class Service:
             if command == "exit":
                 print("Stopping the server")
                 self.stop()
-            elif command == "clients":
-                for client in self.clients:
-                    print("Client: "+str(client.addr))
-            elif command == "test1":
-                n = int(input("Number of test packets: "))
-                start = time.time()* 1000
-                for i in range(0,n):
-                    self.testPacket()
-                    #time.sleep(0.01)
 
-                end = time.time()* 1000
-                total = end - start
-                print(str(n)+" packets sent in "+str(total)+"ms")
+            elif command == "clients":
+                if(len(self.clients) == 0):
+                    print("No clients connected")
+                else:
+                    for client in self.clients:
+                        print("Client(id: "+str(client.id)+", addr: "+str(client.addr)+")")
+
             elif command == "stat":
                 print("Received "+str(self.counter)+" packets")
             else:
@@ -176,19 +171,11 @@ class Service:
     ####################
     # HELPER FUNCTIONS #
     ####################
-    def testPacket(self):
-        packet = Packet()
-        packet.setPayload(bytes("hello", "utf-8")*25)
-        packet.setSequence(1)
-        packet.setType(0)
-        self.socket.sendto(packet.encode(), (self.addr, self.port))
-
 
     def breakOutSocket(self):
         packet = Packet()
         packet.setPayload(bytes("bye", "utf-8"))
-        packet.setSequence(1)
-        packet.setType(0)
+
         self.socket.sendto(packet.encode(), (self.addr, self.port))
         print("Socket closed")
 
