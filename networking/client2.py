@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-from queue import Queue
+from collections import deque
 
 from .packet2 import Packet
 
@@ -14,10 +14,10 @@ class Client:
         self.ip = ip
         self.port = port
         self.running = True
-        self.bufferSize = 8192
+        self.bufferSize = 1024*4
 
-        self.inputBuffer = Queue()
-        self.outputBuffer = Queue()
+        self.inputBuffer = deque()
+        self.outputBuffer = deque()
 
         self.seqIn  = 0
         self.seqOut = 0
@@ -25,10 +25,13 @@ class Client:
         self.send_time = time.perf_counter()
         self.receive_time = time.perf_counter()
 
+        self.socket_lock = threading.Lock()
+
         # init the socket
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.socket.connect((ip, port))
+
         except socket.error:
             print("Unable to start connection")
             self.running = False
@@ -48,18 +51,20 @@ class Client:
 
     def stop(self):
         self.running = False
+        self.receiverThread.join()
+        self.senderThread.join()
 
     def send(self, packet):
         packet.seq = self.seqOut
         self.seqOut = self.seqOut + 1
-        self.outputBuffer.put(packet)
+        self.outputBuffer.append(packet.encode())
 
     ####################
     # Receiving thread #
     ####################
     def receiver(self):
         while(self.running):
-            time.sleep(0.02)
+            time.sleep(0.01)
             try:
                 raw = self.socket.recvfrom(self.bufferSize)
                 self.receive_time = time.perf_counter()
@@ -67,7 +72,7 @@ class Client:
                 packet = Packet()
                 packet.decode(raw[0])
 
-                self.inputBuffer.put(packet)
+                self.inputBuffer.append(packet)
             except socket.error:
                 print("Client socket encountered an error")
                 self.running = False
@@ -77,14 +82,17 @@ class Client:
     ##################
     def sender(self):
         while(self.running):
-            time.sleep(0.02)
-            while not self.outputBuffer.empty():
+            time.sleep(0.01)
+
+            while self.outputBuffer:
                 self.send_time = time.perf_counter()
-                packet = self.outputBuffer.get()
-                self.socket.sendto(packet.encode(), (self.ip, self.port))
+                packet = self.outputBuffer.popleft()
+
+                with self.socket_lock:
+                    self.socket.sendto(packet, (self.ip, self.port))
 
             # if we haven't sent anything in a while, send a ping packet
-            if(self.outputBuffer.empty() and self.send_time + 0.2 < time.perf_counter()):
+            if(not self.outputBuffer and self.send_time + 0.2 < time.perf_counter()):
                 ping = Packet()
                 ping.type = 4
                 self.send(ping)
