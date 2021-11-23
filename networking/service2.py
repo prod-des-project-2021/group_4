@@ -83,7 +83,7 @@ class Service:
     # Command thread
     def io(self):
         while(self.running):
-            time.sleep(0.05)
+            time.sleep(0.02)
 
             command = input()
             if command == "exit":
@@ -106,6 +106,7 @@ class Service:
     def receiver(self):
         counter = 0
         while(self.running):
+            time.sleep(0.02)
             try:
                 packet = self.socket.recvfrom(self.bufferSize)
                 self.inputBuffer.put(packet)
@@ -116,7 +117,7 @@ class Service:
     # Sending thread
     def sender(self):
         while(self.running):
-            time.sleep(0.01)
+            time.sleep(0.02)
             # processing the outputBuffer
             for client in self.clients:
                 while not client.outputBuffer.empty():
@@ -126,7 +127,7 @@ class Service:
     # Process clients
     def processor(self):
         while(self.running):
-            time.sleep(0.05)
+            time.sleep(0.02)
             # sending all packets to clients
             self.forwardPackets()
 
