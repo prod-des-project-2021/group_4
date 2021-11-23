@@ -5,6 +5,7 @@ from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
 from GameObjects import Player
 from GameObjects import Bullet
 from GameObjects import ParticleEmitter
+from GameObjects import DestroyEnemy
 from pygame import transform
 from pygame.draw import rect
 from pygame.transform import rotate
@@ -16,6 +17,8 @@ pygame.init()
 displaywidth = 1024
 displayheight = 768
 screen = pygame.display.set_mode((displaywidth, displayheight))
+
+destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
 
 #Caption
 pygame.display.set_caption("Multiplayer Game")
@@ -132,12 +135,17 @@ if __name__ == '__main__':
             elif b.y > pygame.display.Info().current_h or b.y <= 0:
                 bullets.remove(b)
         lastshot+=1
+
+        destroyEnemyGroup.draw(screen)
+        destroyEnemyGroup.update()
         
         for b in bullets:
             b.moveBullet()
             b.draw(screen)
             for e in enemies:
                 if b.rect.colliderect(e.rect):
+                    destroyEnemy = DestroyEnemy(b.x, b.y)
+                    destroyEnemyGroup.add(destroyEnemy)
                     enemies.remove(e)
                     bullets.remove(b)
                 
