@@ -3,6 +3,8 @@ import threading
 import time
 from queue import Queue
 
+from .packet2 import Packet
+
 class Client:
 
     #######################
@@ -19,6 +21,9 @@ class Client:
 
         self.seqIn  = 0
         self.seqOut = 0
+
+        self.send_time = time.perf_counter()
+        self.receive_time = time.perf_counter()
 
         # init the socket
         try:
@@ -45,6 +50,8 @@ class Client:
         self.running = False
 
     def send(self, packet):
+        packet.seq = self.seqOut
+        self.seqOut = self.seqOut + 1
         self.outputBuffer.put(packet)
 
     ####################
@@ -52,8 +59,14 @@ class Client:
     ####################
     def receiver(self):
         while(self.running):
+            time.sleep(0.02)
             try:
-                packet = self.socket.recvfrom(self.bufferSize)
+                raw = self.socket.recvfrom(self.bufferSize)
+                self.receive_time = time.perf_counter()
+
+                packet = Packet()
+                packet.decode(raw[0])
+
                 self.inputBuffer.put(packet)
             except socket.error:
                 print("Client socket encountered an error")
@@ -64,7 +77,14 @@ class Client:
     ##################
     def sender(self):
         while(self.running):
-            time.sleep(0.01)
+            time.sleep(0.02)
             while not self.outputBuffer.empty():
+                self.send_time = time.perf_counter()
                 packet = self.outputBuffer.get()
                 self.socket.sendto(packet.encode(), (self.ip, self.port))
+
+            # if we haven't sent anything in a while, send a ping packet
+            if(self.outputBuffer.empty() and self.send_time + 0.2 < time.perf_counter()):
+                ping = Packet()
+                ping.type = 4
+                self.send(ping)
