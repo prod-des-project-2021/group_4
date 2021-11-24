@@ -14,13 +14,16 @@ class Client:
         self.ip = ip
         self.port = port
         self.running = True
-        self.bufferSize = 1024*4
+        self.bufferSize = 1024
 
         self.inputBuffer = deque()
         self.outputBuffer = deque()
 
         self.seqIn  = 0
         self.seqOut = 0
+
+        # event hooks
+        self.onReceive = None
 
         self.send_time = time.perf_counter()
         self.receive_time = time.perf_counter()
@@ -30,8 +33,7 @@ class Client:
         # init the socket
         try:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.socket.connect((ip, port))
-
+            self.socket.sendto(Packet().encode(), (self.ip, self.port))
         except socket.error:
             print("Unable to start connection")
             self.running = False
@@ -39,7 +41,7 @@ class Client:
         # init threads
         self.receiverThread = threading.Thread(target=self.receiver)
         self.senderThread = threading.Thread(target=self.sender)
-
+        self.processorThread = threading.Thread(target=self.processor)
     #############
     # Interface #
     #############
@@ -48,6 +50,7 @@ class Client:
     def start(self):
         self.receiverThread.start()
         self.senderThread.start()
+        self.processorThread.start()
 
     def stop(self):
         self.running = False
@@ -74,7 +77,7 @@ class Client:
 
                 self.inputBuffer.append(packet)
             except socket.error:
-                print("Client socket encountered an error")
+                print("Server closed the connection, probably...")
                 self.running = False
 
     ##################
@@ -96,3 +99,14 @@ class Client:
                 ping = Packet()
                 ping.type = 4
                 self.send(ping)
+
+    #####################
+    # Processing thread #
+    #####################
+    def processor(self):
+        while(self.running):
+            time.sleep(0.02)
+
+            while self.inputBuffer:
+                packet = self.inputBuffer.popleft()
+                self.onReceive(self, packet)

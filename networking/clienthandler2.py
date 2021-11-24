@@ -1,6 +1,7 @@
 from queue import Queue
 import time
 import struct
+import threading
 from .packet2 import Packet
 
 class ClientHandler:
@@ -68,20 +69,6 @@ class ClientHandler:
         if(packet.seq <= self.seqIn and packet.priority == 0):
             return
 
-        # if packet needs to be acked
-        if(packet.priority == 1):
-            response = Packet()
-            response.type = 3
-            response.setPayload(struct.pack("i", packet.seq))
-            self.ackBuffer.append(response)
-
-        # acked packet, handle it here
-        if(packet.type == 3):
-            ack_number = struct.unpack("i", packet.payload)
-            for ack in self.ackBuffer:
-                pass # do something here
-            return
-
         # ping packet
         if(packet.type == 4):
             response = Packet()
@@ -89,9 +76,12 @@ class ClientHandler:
             self.send(response)
             return
 
-        # if everything is ok, push the packet to input queue
-        self.seqIn = packet.seq
-        self.inputBuffer.put(packet)
+        # packet types over 10 are user controlled
+        # so here we pass the control back to user
+        if(packet.type > 10):
+            # if everything is ok, push the packet to input queue
+            self.seqIn = packet.seq
+            self.inputBuffer.put(packet)
 
 
     ###########################################
@@ -108,9 +98,12 @@ class ClientHandler:
         while not self.inputBuffer.empty():
             packet = self.inputBuffer.get()
 
+            # sending the packet to main control
+            self.service.onReceive(self.service, self, packet)
+
         # if client has timed out, return false
         # and give control to the main thread
-        if(time.perf_counter() > self.timeout + 5.0):
+        if(time.perf_counter() > self.timeout + 3.0):
             return False
 
         return True

@@ -6,6 +6,7 @@ import socket
 import threading
 import time
 import random
+import pprint
 
 from queue import Queue
 from .packet2 import Packet
@@ -18,7 +19,7 @@ class Service:
         self.socket = None
         self.addr = addr
         self.port = port
-        self.bufferSize = 1024*4
+        self.bufferSize = 1024
 
         # buffer for input packets
         self.inputBuffer = Queue()
@@ -31,8 +32,6 @@ class Service:
         self.onConnect      = None
         self.onReceive      = None
         self.onTimeout      = None
-        self.onDisconnect   = None
-        self.onReconnect    = None
 
         # server threads
         self.ioThread        = threading.Thread(target=self.io)
@@ -106,9 +105,11 @@ class Service:
             try:
                 packet = self.socket.recvfrom(self.bufferSize)
                 self.inputBuffer.put(packet)
-            except socket.error:
-                print("Server socket encountered an error")
-                self.running = False
+            except socket.error as error:
+                pass # BECAUSE WE DON*T WANT TO CRASH
+                #print("Server socket encountered an error")
+                #print(str(error))
+                #self.running = False
 
     # Sending thread
     def sender(self):
@@ -130,8 +131,11 @@ class Service:
             # processing all the clients
             for client in self.clients:
                 if(not client.process()):
-                    # handle timeout
-                    print("CLIENT TIMEOUT: "+str(client.id))
+                    # timeout handling
+                    # sending an event to main control
+                    self.onTimeout(self, client.id)
+
+                    # remove client
                     self.clients.remove(client)
 
     # Goes through the inputBuffer
@@ -159,9 +163,11 @@ class Service:
             if(existingClient == False):
 
                 client = ClientHandler(self, rawAddr)
-                print("NEW CLIENT: "+str(client.id))
                 client.receive(rawPayload)
                 self.clients.append(client)
+
+                # sending an event to main control
+                self.onConnect(self, client)
 
 
 
