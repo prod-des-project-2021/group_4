@@ -90,11 +90,12 @@ class Player:
                 braking = Vector2(0.15, 0.15)
                 rotation_angle = braking.angle_to(self.velocity)
                 braking.rotate_ip(rotation_angle)
-                self.velocity -= braking
+                self.velocity -= braking/2
 
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
                     self.velocity = Vector2(0,0)    
+        
         #restricting player position
         if self.position.x >= 1920:
             self.velocity = Vector2(0,0)
