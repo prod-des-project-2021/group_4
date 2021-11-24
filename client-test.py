@@ -5,7 +5,7 @@ import random
 
 def onReceive(client, packet):
     if(packet.type == 5):
-        print("PONG "+str(packet.seq))    
+        print("PONG "+str(packet.seq))
 
 def main():
     client = Client("127.0.0.1", 5555)
