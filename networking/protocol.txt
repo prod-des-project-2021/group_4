@@ -1,0 +1,30 @@
+UPD game protocol
+
+Packets consist of default IP and UDP headers, protocol header and the payload.
+IP and UDP headers are just standard and we do not really care about them.
+
+The protocol header
+Protocol header consists of 10 bytes.
+
+Packet structure
+| Protocol identifier(1B) | Priority(1B) | Sequence no.(4B) | Type(2B) | Payload length(2B) | Payload(1-512B)
+
+Protocol identified: 	  1 byte for protocol identifier.
+Priority: 		          Short integer to tell if the packet needs to be aknowledged.1: (Quaranteed delivery) 0: (fire and forget)
+Sequence no.:		      Sequence number for each packet. Client can ignore packets arriving late if priority = 0
+Type:			          Payload type for parsing the payload
+Payload length:		      Payload length for parsing the payload (max 65,536 but due to fragmentation, real limit is around 1500)
+Payload:		          Any binary encoded data.
+
+Example:
+
+     | Protocol identifier(1B) | Priority(1B) | Sequence no.(4B) | Type(2B | Payload length(2B) | Payload(1-512B)
+CON  | f1                      | 01           | 00 00 00 01      | 00 01   | 00 01              | 00 <- dummy payload
+ACK  | f1                      | 00           | 00 00 00 01      | 00 03   | 00 04              | 00 00 00 01 <- acked packet seq
+ACT  | f1                      | 01           | 00 00 00 02      | 00 06   | 00 08              | 00 0C 1A 14 00 0B 12 0A
+ACK  | f1                      | 00           | 00 00 00 02      | 00 03   | 00 04              | 00 00 00 02 <- acked packet seq
+
+Acknowledgement of packet arrival
+Receiver must send ACK message to the other party when some messages priority is set to 1
+The message is sent again until ACK for that message is received.
+In case the ACK packet gets dropped the receiver must ignore the re sent requests and send the ACK packet again.
