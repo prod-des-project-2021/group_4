@@ -100,6 +100,7 @@ if __name__ == '__main__':
         playerEngineTrail.draw(screen)
         player.draw(screen)
         playerEngineTrail.updatePosition(player.position.x, player.position.y)
+        
         if mousebuttons[2]:
             playerEngineTrail.addParticle(15, -player.direction*5)
         player.update(mousebuttons[2])   
