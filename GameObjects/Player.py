@@ -45,7 +45,6 @@ class Particle:
 class Player:
     def __init__(self, sprite):
         self.sprite = sprite
-       
         # rewritten movement with vectors
         self.position = Vector2(ZERO_X, ZERO_Y)
         self.UP = Vector2(0, 1)
@@ -79,7 +78,6 @@ class Player:
             # guess it's little hacky but whatever
             tempVelocity = Vector2(self.velocity)
             tempVelocity += self.direction * self.acceleration
-
             # if incrementing velocity doesn't exceed max, allow it
             if(tempVelocity.length() < self.max_velocity):
                 self.velocity += self.direction * self.acceleration
@@ -91,7 +89,6 @@ class Player:
                 rotation_angle = braking.angle_to(self.velocity)
                 braking.rotate_ip(rotation_angle)
                 self.velocity -= braking/2
-
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
                     self.velocity = Vector2(0,0)    

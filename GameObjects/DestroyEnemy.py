@@ -1,4 +1,3 @@
-
 import pygame
 
 class DestroyEnemy(pygame.sprite.Sprite):

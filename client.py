@@ -14,8 +14,8 @@ pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
 #resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
-displaywidth = 1024
-displayheight = 768
+displaywidth = 1280
+displayheight = 720
 screen = pygame.display.set_mode((displaywidth, displayheight))
 
 destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
@@ -25,8 +25,6 @@ pygame.display.set_caption("Multiplayer Game")
 
 #Player values
 angle = 0
-#x = 50
-#y = 50
 bullets = []
 enemies = []
 tickrate = 120
@@ -37,7 +35,6 @@ width = 64
 height = 64
 basespeed = 4
 slowmodifier = 0.5
-#vel = basespeed
 
 #colors
 grey = 75,75,75
@@ -123,8 +120,6 @@ if __name__ == '__main__':
 
         if mousebuttons[0]:
             if lastshot > tickrate/firerate:
-                #targetX, targetY = pygame.mouse.get_pos()
-                #print(targetX,targetY) #comment this later
                 b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
                 bullets.append(b)
                 lastshot = 0
