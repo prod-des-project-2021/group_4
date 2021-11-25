@@ -1,14 +1,10 @@
-import pygame
-import math
-import random
+import pygame, math, random, struct
 from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
-from GameObjects import Player
-from GameObjects import Bullet
-from GameObjects import ParticleEmitter
-from GameObjects import DestroyEnemy
+from GameObjects import Player, Bullet, ParticleEmitter, DestroyEnemy
 from pygame import transform
 from pygame.draw import rect
 from pygame.transform import rotate
+from networking import Client, Packet
 
 pygame.init()
 
@@ -75,11 +71,18 @@ def rotate(surface,angle,width,height):
    rotated_rect = rotated_surface.get_rect(center = (width,height))
    return rotated_surface, rotated_rect
 
+def onReceive(client, packet):
+    if True:
+        print("jotain tuli takasi")
+
 if __name__ == '__main__':
     pygame.init()
     screen = pygame.display.set_mode((displaywidth,displayheight), pygame.RESIZABLE, vsync=1)
     clock = pygame.time.Clock()
     running = True
+
+    client = Client("127.0.0.1", 3333)
+    client.start()
 
     playerImg = pygame.image.load('res/player.png')
     enemyImg = pygame.image.load('res/enemy.png')
@@ -90,6 +93,7 @@ if __name__ == '__main__':
     playerEngineTrail = ParticleEmitter(engineTrailImg)
     
     while(running):
+        client.onReceive = onReceive
         Player.ZERO_X = pygame.display.Info().current_w /  2
         Player.ZERO_Y = pygame.display.Info().current_h /  2
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -100,7 +104,7 @@ if __name__ == '__main__':
         playerEngineTrail.draw(screen)
         player.draw(screen)
         playerEngineTrail.updatePosition(player.position.x, player.position.y)
-        
+
         if mousebuttons[2]:
             playerEngineTrail.addParticle(15, -player.direction*5)
         player.update(mousebuttons[2])   
@@ -150,6 +154,13 @@ if __name__ == '__main__':
             e.draw(screen)
             if e.rect.y > pygame.display.Info().current_h:
                 enemies.remove(e)
+
+        print(str(player.position.x) + " " + str(player.position.y))
+        encoded_position = struct.pack("f f", player.position.x, player.position.y)
+        packet = Packet()
+        packet.type = 11
+        packet.setPayload(encoded_position)
+        client.send(packet)
 
         clock.tick(tickrate)
         pygame.display.flip()
