@@ -1,4 +1,6 @@
 import struct
+
+from pygame.math import Vector2
 from networking import Service
 from pygame.math import Vector2
 import pygame

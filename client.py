@@ -73,7 +73,7 @@ def rotate(surface,angle,width,height):
 
 def onReceive(client, packet):
     if True:
-        print("jotain tuli takasi")
+        print("pong")
 
 if __name__ == '__main__':
     pygame.init()
@@ -156,7 +156,7 @@ if __name__ == '__main__':
                 enemies.remove(e)
 
         print(str(player.position.x) + " " + str(player.position.y))
-        encoded_position = struct.pack("f f", player.position.x, player.position.y)
+        encoded_position = struct.pack("d d", player.position.x, player.position.y)
         packet = Packet()
         packet.type = 11
         packet.setPayload(encoded_position)
