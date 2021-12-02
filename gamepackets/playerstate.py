@@ -1,8 +1,5 @@
 import struct
-
-# | id | x | y | angle | velX | VelY | health | accelerating | shooting
-PLAYER_STATE_FORMAT = "i d d d d d s s s"
-PLAYER_STATE = 11
+from .formats import *
 
 def playerstate_pack(player):
     packed = struct.pack(PLAYER_STATE_FORMAT,
