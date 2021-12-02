@@ -32,6 +32,7 @@ class Service:
         self.onConnect      = None
         self.onReceive      = None
         self.onTimeout      = None
+        self.onServerExit   = None
 
         # server threads
         self.ioThread        = threading.Thread(target=self.io)
@@ -71,6 +72,12 @@ class Service:
         self.running = False
         self.breakOutSocket()
         self.socket.close()
+
+        self.receiverThread.join()
+        self.senderThread.join()
+        self.processorThread.join()
+
+        self.onServerExit()
 
     ###################
     # SERVICE THREADS #

@@ -28,3 +28,21 @@ Acknowledgement of packet arrival
 Receiver must send ACK message to the other party when some messages priority is set to 1
 The message is sent again until ACK for that message is received.
 In case the ACK packet gets dropped the receiver must ignore the re sent requests and send the ACK packet again.
+
+
+Payloads
+
+Type 11
+Player position (8B)
+| X position  | Y position  |
+| 4B (double) | 4B (double) |
+
+Type 12
+Player action
+| Action id |
+| 4B (int)  |
+
+Type 50
+Gamestate (NB)
+| Player Count | Player id | Position X | Position Y | Angle      | Velocity  | Shooting  |
+| 4B(int)      | 4B(int)   | 4B(double) | 4B(double) | 4B(double) | 4B(double)| 2B(short) |
