@@ -55,7 +55,11 @@ class Player:
         self.rotatedSprite = None
         self.rotate() # initialize the rotated sprite
         self.max_velocity = 4.0
-        
+        self.accelerating = 0
+        self.shooting = 0
+        self.max_health = 100
+        self.health = self.max_health
+          
     def draw(self, screen):
         screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
         pygame.draw.line(screen, (255,255,255), (ZERO_X, 0), (ZERO_X, ZERO_Y*2))
@@ -74,6 +78,7 @@ class Player:
 
     def update(self, accelerating):
         if(accelerating):
+            self.accelerating = 1
             # limiting the velocity
             # guess it's little hacky but whatever
             tempVelocity = Vector2(self.velocity)
@@ -83,6 +88,7 @@ class Player:
                 self.velocity += self.direction * self.acceleration
 
         else:
+            self.accelerating = 0
             if(self.velocity.length() > 0):
                 # braking vector
                 braking = Vector2(0.15, 0.15)

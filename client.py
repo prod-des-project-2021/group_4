@@ -81,7 +81,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     running = True
 
-    client = Client("127.0.0.1", 3333)
+    client = Client("127.0.0.1", 5555)
     client.start()
 
     playerImg = pygame.image.load('res/player.png')
@@ -124,10 +124,13 @@ if __name__ == '__main__':
             enemies.append(e)
 
         if mousebuttons[0]:
+            player.shooting = 1
             if lastshot > tickrate/firerate:
                 b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
                 bullets.append(b)
                 lastshot = 0
+        else:
+            player.shooting = 0
 
         for b in bullets:
             if b.x > pygame.display.Info().current_w or b.x <= 0:
@@ -155,7 +158,7 @@ if __name__ == '__main__':
             if e.rect.y > pygame.display.Info().current_h:
                 enemies.remove(e)
 
-        print(str(player.position.x) + " " + str(player.position.y))
+        #print(str(player.position.x) + " " + str(player.position.y))
         encoded_position = struct.pack("d d", player.position.x, player.position.y)
         packet = Packet()
         packet.type = 11
