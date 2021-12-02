@@ -99,7 +99,7 @@ class Service:
                 else:
                     for client in self.clients:
                         print("==== Client(id: "+str(client.id)+", addr: "+str(client.addr)+") ====")
-                        print("Data in: "+str(client.data_per_sec/1000)+" KB/s, Packets out: "+str(client.packets_out_per_sec)+"/s, Packets in: "+str(client.packets_in_per_sec)+"/s")
+                        print("Data in: "+str(client.data_per_sec/1000)+" KB/s, Data out: "+str(client.data_per_sec_out/1000)+" KB/s, Packets out: "+str(client.packets_out_per_sec)+"/s, Packets in: "+str(client.packets_in_per_sec)+"/s")
 
             elif command == "stat":
                 print("Received "+str(self.counter)+" packets")

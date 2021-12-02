@@ -12,6 +12,7 @@ class Packet:
         self.type       = 0
         self.payload    = b'0x00'
         self.payloadLength = 1
+        self.size = 0
 
     ####################################
     # Setting the payload              #
@@ -20,6 +21,7 @@ class Packet:
     def setPayload(self, payload):
         self.payload = payload
         self.payloadLength = len(payload)
+        self.size = struct.calcsize('2s h i h i '+str(self.payloadLength)+'s')
 
     ###################################
     # Encoding the packet to byteform #
@@ -53,7 +55,7 @@ class Packet:
             self.type           = decodedPacket[3]
             self.payloadLength  = decodedPacket[4]
 
-            # decoding the payload with a variable size            
+            # decoding the payload with a variable size
             decodedPayload = struct.unpack_from(str(self.payloadLength)+'s', raw, staticSize)
             self.payload = decodedPayload[0]
 
