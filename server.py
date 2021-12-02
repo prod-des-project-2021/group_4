@@ -37,7 +37,7 @@ class GameServer:
     def onReceive(self, server, client, packet):
 
         # receiving state from player
-        if(packet.type == PLAYER_STATE):
+        if(packet.type == gamepackets.PLAYER_STATE):
             data = gamepackets.playerstate_unpack(packet.payload)
 
             # updating the players state
