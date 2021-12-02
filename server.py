@@ -89,6 +89,11 @@ class Bullet:
     def update(self):
         pass
 
+def gamemonitor(viesti):
+    print("Starting up the monitor..."+viesti)
+
+def tests():
+    print("test")
 
 def main():
     server = Service("127.0.0.1", 5555)
@@ -99,6 +104,10 @@ def main():
     server.onConnect = gameserver.onConnect
     server.onReceive = gameserver.onReceive
     server.onServerExit = gameserver.onServerExit
+
+    # adding own commands to the server io
+    server.addCommand("monitor", gamemonitor, args=("testArg"))
+    server.addCommand("test", tests)
 
     server.start()
     clock = pygame.time.Clock()

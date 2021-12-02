@@ -34,6 +34,9 @@ class Service:
         self.onTimeout      = None
         self.onServerExit   = None
 
+        # custom commands
+        self.commands = {}
+
         # server threads
         self.ioThread        = threading.Thread(target=self.io)
         self.receiverThread  = threading.Thread(target=self.receiver)
@@ -79,10 +82,12 @@ class Service:
 
         self.onServerExit()
 
+    def addCommand(self, command_str, command_func, args = None):
+        self.commands[command_str] = (command_func, args)
+
     ###################
     # SERVICE THREADS #
     ###################
-
     # Command thread
     def io(self):
         while(self.running):
@@ -104,7 +109,13 @@ class Service:
             elif command == "stat":
                 print("Received "+str(self.counter)+" packets")
             else:
-                print("Unknown command")
+                if command in self.commands:
+                    if(self.commands[command][1] != None):
+                        self.commands[command][0](self.commands[command][1])
+                    else:
+                        self.commands[command][0]()
+                else:
+                    print("Unknown command")
 
     # Receiving thread
     def receiver(self):
