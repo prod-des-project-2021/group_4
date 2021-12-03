@@ -16,7 +16,7 @@ def onReceive(client, packet):
 
 class Player:
     def __init__(self):
-        self.id =       id
+        self.id =       0
         self.position = Vector2(0,0)
         self.velocity = Vector2(0,0)
         self.angle =    0.0
@@ -34,9 +34,10 @@ def main():
     player = Player()
 
     while(True):
-        time.sleep(0.02)
+        time.sleep(0.01)
         player.position.x = player.position.x + 0.01
         player.position.y = player.position.y + 0.01
+        print(player.position.x)
         packet = Packet()
         packet.type = gamepackets.PLAYER_STATE
         packet.setPayload(gamepackets.playerstate_pack(player))
