@@ -10,8 +10,8 @@ pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
 #resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
-displaywidth = 1280
-displayheight = 720
+displaywidth = 1920
+displayheight = 1080
 screen = pygame.display.set_mode((displaywidth, displayheight))
 
 destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
