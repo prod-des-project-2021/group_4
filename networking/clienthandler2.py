@@ -25,10 +25,12 @@ class ClientHandler:
         self.received_packets = 0
         self.sent_packets = 0
         self.received_data = 0
+        self.sent_data = 0
 
         self.packets_in_per_sec = 0
         self.packets_out_per_sec = 0
         self.data_per_sec = 0
+        self.data_per_sec_out = 0
 
         self.last_process = time.perf_counter()
 
@@ -39,10 +41,12 @@ class ClientHandler:
     ###########################################
     def send(self, packet):
         self.sent_packets += 1
+        self.sent_data += packet.size
 
         packet.seq = self.seqOut
         self.seqOut = self.seqOut + 1
         self.outputBuffer.put(packet)
+
 
     #######################################
     # Incoming packets from client        #
@@ -116,9 +120,11 @@ class ClientHandler:
         # processing the numbers
         if(time.perf_counter() > self.last_process + 1.0):
             self.data_per_sec = self.received_data
+            self.data_per_sec_out = self.sent_data
             self.packets_out_per_sec = self.sent_packets
             self.packets_in_per_sec = self.received_packets
 
+            self.sent_data = 0
             self.received_data = 0
             self.sent_packets = 0
             self.received_packets = 0

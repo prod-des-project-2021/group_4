@@ -45,7 +45,6 @@ class Particle:
 class Player:
     def __init__(self, sprite):
         self.sprite = sprite
-       
         # rewritten movement with vectors
         self.position = Vector2(ZERO_X, ZERO_Y)
         self.UP = Vector2(0, 1)
@@ -56,7 +55,11 @@ class Player:
         self.rotatedSprite = None
         self.rotate() # initialize the rotated sprite
         self.max_velocity = 4.0
-        
+        self.accelerating = 0
+        self.shooting = 0
+        self.max_health = 100
+        self.health = self.max_health
+          
     def draw(self, screen):
         screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
         pygame.draw.line(screen, (255,255,255), (ZERO_X, 0), (ZERO_X, ZERO_Y*2))
@@ -75,23 +78,23 @@ class Player:
 
     def update(self, accelerating):
         if(accelerating):
+            self.accelerating = 1
             # limiting the velocity
             # guess it's little hacky but whatever
             tempVelocity = Vector2(self.velocity)
             tempVelocity += self.direction * self.acceleration
-
             # if incrementing velocity doesn't exceed max, allow it
             if(tempVelocity.length() < self.max_velocity):
                 self.velocity += self.direction * self.acceleration
 
         else:
+            self.accelerating = 0
             if(self.velocity.length() > 0):
                 # braking vector
                 braking = Vector2(0.15, 0.15)
                 rotation_angle = braking.angle_to(self.velocity)
                 braking.rotate_ip(rotation_angle)
                 self.velocity -= braking/2
-
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
                     self.velocity = Vector2(0,0)    

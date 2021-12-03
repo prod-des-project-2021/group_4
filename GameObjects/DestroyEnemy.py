@@ -1,4 +1,3 @@
-
 import pygame
 
 class DestroyEnemy(pygame.sprite.Sprite):
@@ -6,7 +5,7 @@ class DestroyEnemy(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.images = []
         for num in range(1,6):
-            img = pygame.image.load(f"img/img{num}.png")
+            img = pygame.image.load(f"img/wut ({num}).png")
             img = pygame.transform.scale(img,(50,50))
             self.images.append(img)
         self.index = 0
