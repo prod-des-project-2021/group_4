@@ -47,11 +47,11 @@ class GameServer:
         self.players.append(Player(client.id, client))
 
     def onReceive(self, server, client, packet):
-
+        print(packet)
         # receiving state from player
         if(packet.type == gamepackets.PLAYER_STATE):
             data = gamepackets.playerstate_unpack(packet.payload)
-
+            print(data)
             # updating the players state
             for player in self.players:
                 if player.id == client.id:
@@ -71,6 +71,7 @@ class Player:
         self.client = client # adding handle to client so we can SEND
 
     def updateState(self, data):
+        print(data)
         self.position.x = data["position.x"]
         self.position.y = data["position.y"]
 
