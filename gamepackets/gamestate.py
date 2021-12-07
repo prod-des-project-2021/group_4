@@ -24,7 +24,7 @@ def gamestate_unpack(raw):
 # players: list of players
 # returns list encoded in bytes
 def gamestate_pack(players, me_id):
-    player_count = len(players)
+    player_count = len(players)-1
 
     # getting a copy of gamestate format
     gamestate_format = str(GAME_STATE_FORMAT)
