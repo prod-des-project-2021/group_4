@@ -91,6 +91,7 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                client.stop()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouseDown = True
             elif event.type == pygame.MOUSEBUTTONUP:
