@@ -35,8 +35,8 @@ def main():
 
     while(True):
         time.sleep(0.01)
-        player.position.x = player.position.x + 0.01
-        player.position.y = player.position.y + 0.01
+        player.position.x = player.position.x + 0.1
+        player.position.y = player.position.y + 0.1
         print(player.position.x)
         packet = Packet()
         packet.type = gamepackets.PLAYER_STATE

@@ -7,6 +7,7 @@ from pygame.math import Vector2
 import pygame
 import struct
 import gamepackets
+from gamemonitor import GameMonitor
 
 class GameServer:
     def __init__(self):
@@ -88,8 +89,8 @@ class Bullet:
     def update(self):
         pass
 
-def gamemonitor(viesti):
-    print("Starting up the monitor..."+viesti)
+def gamemonitor(players):
+    gm = GameMonitor(players)
 
 def tests():
     print("test")
@@ -105,7 +106,7 @@ def main():
     server.onServerExit = gameserver.onServerExit
 
     # adding own commands to the server io
-    server.addCommand("monitor", gamemonitor, args=("testArg"))
+    server.addCommand("monitor", gamemonitor, args=(gameserver.players))
     server.addCommand("test", tests)
 
     server.start()
