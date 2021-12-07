@@ -1,10 +1,11 @@
 import pygame, math, random, struct
 from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
 from GameObjects import Player, Bullet, ParticleEmitter, DestroyEnemy
-from pygame import transform
+from pygame import Rect, transform
 from pygame.draw import rect
 from pygame.transform import rotate
 from networking import Client, Packet
+import gamepackets
 
 pygame.init()
 
@@ -20,7 +21,6 @@ destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
 pygame.display.set_caption("Multiplayer Game")
 
 #Player values
-angle = 0
 bullets = []
 enemies = []
 tickrate = 120
@@ -29,8 +29,9 @@ firerate = 2        #shots per second (keep under tickrate since maximum amount 
 bulletspeed = 8
 width = 64
 height = 64
-basespeed = 4
-slowmodifier = 0.5
+playerlist = list()
+
+
 
 #colors
 grey = 75,75,75
@@ -41,30 +42,6 @@ yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
 
-class Square:
-    def __init__(self, color, x, y, width, height, speed):
-        self.rect = pygame.Rect(x,y,width,height)
-        self.color = color
-        self.speed = speed
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-
-class Enemy(Square):
-    def __init__(self, color, ex, ey, width, height):
-        self.rect = pygame.Rect(ex,ey, width, height)
-        self.width = width
-        self.height = height
-        self.x = ex
-        self.y = ey
-        self.color = color
-
-    def moveEnemy(self):
-        self.dx = 0                           #most of these are useless when we get other players from server
-        self.dy = basespeed * slowmodifier    #here for testing only (get these from server at some point)
-        self.x = self.x + self.dx
-        self.y = self.y + self.dy       
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
 
 def rotate(surface,angle,width,height):
    rotated_surface = pygame.transform.rotozoom(surface,angle,1)
@@ -72,8 +49,10 @@ def rotate(surface,angle,width,height):
    return rotated_surface, rotated_rect
 
 def onReceive(client, packet):
-    if True:
-        print("pong")
+    global playerlist
+    if packet.type == gamepackets.GAME_STATE:
+        playerlist = gamepackets.gamestate_unpack(packet.payload)
+        
 
 if __name__ == '__main__':
     pygame.init()
@@ -117,12 +96,6 @@ if __name__ == '__main__':
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouseDown = False
 
-        #randomized enemies for testing purposes
-        if random.randint(1,60) == 1:
-            ex = random.randint(1, pygame.display.Info().current_w - width)
-            e = Enemy(green, ex, 0, width, height)
-            enemies.append(e)
-
         if mousebuttons[0]:
             player.shooting = 1
             if lastshot > tickrate/firerate:
@@ -145,23 +118,15 @@ if __name__ == '__main__':
         for b in bullets:
             b.moveBullet()
             b.draw(screen)
-            for e in enemies:
-                if b.rect.colliderect(e.rect):
-                    destroyEnemy = DestroyEnemy(b.x, b.y)
-                    destroyEnemyGroup.add(destroyEnemy)
-                    enemies.remove(e)
-                    bullets.remove(b)
-                
-        for e in enemies:
-            e.moveEnemy()
-            e.draw(screen)
-            if e.rect.y > pygame.display.Info().current_h:
-                enemies.remove(e)
+
+        for p in playerlist:
+            Rectangle = pygame.Rect(int(p['position.x']),int(p['position.y']),width,height)
+            pygame.draw.rect(screen,green,Rectangle)
 
         #print(str(player.position.x) + " " + str(player.position.y))
-        encoded_position = struct.pack("d d", player.position.x, player.position.y)
+        encoded_position = gamepackets.playerstate_pack(player)
         packet = Packet()
-        packet.type = 11
+        packet.type = gamepackets.PLAYER_STATE
         packet.setPayload(encoded_position)
         client.send(packet)
 

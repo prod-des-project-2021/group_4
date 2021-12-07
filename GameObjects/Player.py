@@ -59,6 +59,7 @@ class Player:
         self.shooting = 0
         self.max_health = 100
         self.health = self.max_health
+        self.id = 0
           
     def draw(self, screen):
         screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
