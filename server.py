@@ -25,12 +25,11 @@ class GameServer:
 
     def sendState(self, service):
         if self.players:
-            gamestate = gamepackets.gamestate_pack(self.players)
-            packet = Packet()
-            packet.type = gamepackets.GAME_STATE
-            packet.setPayload(gamestate)
-
             for player in self.players:
+                gamestate = gamepackets.gamestate_pack(self.players, player.id)
+                packet = Packet()
+                packet.type = gamepackets.GAME_STATE
+                packet.setPayload(gamestate)
                 player.client.send(packet)
 
     def onServerExit(self):
@@ -73,6 +72,12 @@ class Player:
     def updateState(self, data):
         self.position.x = data["position.x"]
         self.position.y = data["position.y"]
+        self.angle = data['angle']
+        self.velocity.x = data['velocity.x']
+        self.velocity.y = data['velocity.y']
+        self.accelerating = data['accelerating']
+        self.shooting = data['shooting']
+
 
     def update(self):
         pass
