@@ -118,10 +118,15 @@ if __name__ == '__main__':
         for b in bullets:
             b.moveBullet()
             b.draw(screen)
-
+            
         for p in playerlist:
-            Rectangle = pygame.Rect(int(p['position.x']),int(p['position.y']),width,height)
+            Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)    
             pygame.draw.rect(screen,green,Rectangle)
+            for b in bullets:
+                if b.rect.colliderect(Rectangle):
+                    destroyEnemy = DestroyEnemy(b.x,b.y)
+                    destroyEnemyGroup.add(destroyEnemy)
+                    bullets.remove(b)
 
         #print(str(player.position.x) + " " + str(player.position.y))
         encoded_position = gamepackets.playerstate_pack(player)
