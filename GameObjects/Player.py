@@ -60,10 +60,11 @@ class Player:
         self.max_health = 100
         self.health = self.max_health
         self.id = 0
-          
+        self.alive = True 
+
     def draw(self, screen):
         screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
-        
+
 
     def rotate(self):
         self.direction = Vector2(self.UP)
@@ -95,8 +96,8 @@ class Player:
                 self.velocity -= braking/2
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
-                    self.velocity = Vector2(0,0)    
-        
+                    self.velocity = Vector2(0,0)
+
         #restricting player position
         if self.position.x >= 1920:
             self.velocity = Vector2(0,0)
@@ -113,7 +114,7 @@ class Player:
 
         self.position += self.velocity
         self.rotate()
-       
+
 def radToDec(rad):
     return (rad*180/math.pi)
 

@@ -1,4 +1,4 @@
-# | id | x | y | angle | velX | VelY | health | accelerating | shooting
+# | id | x | y | angle | velX | VelY | health | accelerating | shooting | alive 
 PLAYER_STATE_FORMAT = "i d d d d d h h h h"
 PLAYER_STATE = 11
 

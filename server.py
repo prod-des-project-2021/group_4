@@ -27,7 +27,6 @@ class GameServer:
 
     def update(self):
         for player in self.players:
-
             #collision detection
             for bullet in self.bullets:
                 if isColliding(bullet, player) and player.id != bullet.player.id:
@@ -100,17 +99,18 @@ class Player:
         self.client = client # adding handle to client so we can SEND
 
     def updateState(self, data):
-        self.position.x = data["position.x"]
-        self.position.y = data["position.y"]
+        if(self.alive):
+            self.position.x = data["position.x"]
+            self.position.y = data["position.y"]
 
-        self.angle = data['angle']
-        self.direction = Vector2(NORMAL_VECTOR)
-        self.direction.rotate_ip(-self.angle)
+            self.angle = data['angle']
+            self.direction = Vector2(NORMAL_VECTOR)
+            self.direction.rotate_ip(-self.angle)
 
-        self.velocity.x = data['velocity.x']
-        self.velocity.y = data['velocity.y']
-        self.accelerating = data['accelerating']
-        self.shooting = data['shooting']
+            self.velocity.x = data['velocity.x']
+            self.velocity.y = data['velocity.y']
+            self.accelerating = data['accelerating']
+            self.shooting = data['shooting']
 
 
     def update(self):
@@ -118,7 +118,7 @@ class Player:
             self.reloadTime -= 1
 
         if self.health <= 0:
-            self.alive = False 
+            self.alive = False
 
         if self.reloadTime == 0 and self.shooting:
             self.gameserver.addBullet(self)
