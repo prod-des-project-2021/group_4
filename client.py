@@ -34,6 +34,7 @@ bulletspeed = 8
 width = 64
 height = 64
 playerlist = list()
+own_id = 0
 
 
 
@@ -54,9 +55,10 @@ def rotate(surface,angle,width,height):
 
 def onReceive(client, packet):
     global playerlist
+    global own_id
     if packet.type == gamepackets.GAME_STATE:
-        playerlist = gamepackets.gamestate_unpack(packet.payload)
-        
+        own_id, playerlist = gamepackets.gamestate_unpack(packet.payload)
+      
 
 if __name__ == '__main__':
     pygame.init()
@@ -65,6 +67,7 @@ if __name__ == '__main__':
     running = True
 
     client = Client("127.0.0.1", 5555)
+    client.onReceive = onReceive
     client.start()
 
     playerImg = pygame.image.load('res/player.png')
@@ -78,7 +81,6 @@ if __name__ == '__main__':
     while(running):
         screen.fill(black)
         screen.blit(background,(0,0))
-        client.onReceive = onReceive
         Player.ZERO_X = pygame.display.Info().current_w /  2
         Player.ZERO_Y = pygame.display.Info().current_h /  2
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -126,13 +128,17 @@ if __name__ == '__main__':
             b.draw(screen)
             
         for p in playerlist:
-            Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)    
-            pygame.draw.rect(screen,green,Rectangle)
-            for b in bullets:
-                if b.rect.colliderect(Rectangle):
-                    destroyEnemy = DestroyEnemy(b.x,b.y)
-                    destroyEnemyGroup.add(destroyEnemy)
-                    bullets.remove(b)
+            if int (p['id']) != own_id:
+                Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)    
+                pygame.draw.rect(screen,green,Rectangle)
+                for b in bullets:
+                    if b.rect.colliderect(Rectangle):
+                        destroyEnemy = DestroyEnemy(b.x,b.y)
+                        destroyEnemyGroup.add(destroyEnemy)
+                        bullets.remove(b)
+            pygame.draw.rect(screen,red,(int(p['position.x'])-width/2,int(p['position.y'])+50,int(p['health'])/2,10))
+            pygame.draw.rect(screen, white,(int(p['position.x'])-width/2,int(p['position.y'])+50,50,10),1)
+            
 
         #print(str(player.position.x) + " " + str(player.position.y))
         encoded_position = gamepackets.playerstate_pack(player)
