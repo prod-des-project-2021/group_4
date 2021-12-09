@@ -11,7 +11,8 @@ def playerstate_pack(player):
         player.velocity.y,
         player.health,
         player.accelerating,
-        player.shooting
+        player.shooting,
+        player.alive
     )
     return packed
 
@@ -26,6 +27,7 @@ def playerstate_unpack(raw):
         "velocity.y":   unpacked[5],
         "health":       unpacked[6],
         "accelerating": unpacked[7],
-        "shooting":     unpacked[8]
+        "shooting":     unpacked[8],
+        "alive":        unpacked[9]
     }
     return data
