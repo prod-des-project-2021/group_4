@@ -20,6 +20,10 @@ destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
 #Caption
 pygame.display.set_caption("Multiplayer Game")
 
+#Background
+background = pygame.image.load("space.jpg")
+background = pygame.transform.scale(background, (1920, 1080))
+
 #Player values
 bullets = []
 enemies = []
@@ -72,6 +76,8 @@ if __name__ == '__main__':
     playerEngineTrail = ParticleEmitter(engineTrailImg)
     
     while(running):
+        screen.fill(black)
+        screen.blit(background,(0,0))
         client.onReceive = onReceive
         Player.ZERO_X = pygame.display.Info().current_w /  2
         Player.ZERO_Y = pygame.display.Info().current_h /  2
@@ -79,7 +85,6 @@ if __name__ == '__main__':
         player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
         player.setAngle(player_angle)
         mousebuttons = pygame.mouse.get_pressed()
-        screen.fill(black)
         playerEngineTrail.draw(screen)
         player.draw(screen)
         playerEngineTrail.updatePosition(player.position.x, player.position.y)
