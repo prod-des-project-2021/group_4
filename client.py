@@ -136,11 +136,11 @@ if __name__ == '__main__':
                         destroyEnemy = DestroyEnemy(b.x,b.y)
                         destroyEnemyGroup.add(destroyEnemy)
                         bullets.remove(b)
-                pygame.draw.rect(screen,red,(int(p['position.x'])-width/2+7,int(p['position.y'])+20,int(p['health'])/2,10))
-                pygame.draw.rect(screen, white,(int(p['position.x'])-width/2+7,int(p['position.y'])+20,50,10),1)
+                pygame.draw.rect(screen,red,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,int(p['health'])/2,10))
+                pygame.draw.rect(screen, white,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,50,10),1)
             else :
-                pygame.draw.rect(screen,red,(int(player.position.x)-width/2+7,int(player.position.y)+20,int(p['health'])/2,10))
-                pygame.draw.rect(screen, white,(int(player.position.x)-width/2+7,int(player.position.y)+20,50,10),1)
+                pygame.draw.rect(screen,red,(int(player.position.x)-width/2+7,int(player.position.y)+25,int(p['health'])/2,5))
+                pygame.draw.rect(screen, white,(int(player.position.x)-width/2+7,int(player.position.y)+25,50,5),1)
             
 
         #print(str(player.position.x) + " " + str(player.position.y))
