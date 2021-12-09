@@ -9,7 +9,7 @@ import struct
 import gamepackets
 from gamemonitor import GameMonitor
 
-NORMAL_VECTOR = Vector2(0, -1)
+NORMAL_VECTOR = Vector2(0, 1)
 
 class GameServer:
     def __init__(self):
@@ -46,7 +46,7 @@ class GameServer:
 
     def onConnect(self, server, client):
         print(str(client.id)+" has connected!")
-        self.players.append(Player(client.id, client))
+        self.players.append(Player(client.id, client, self))
 
     def onReceive(self, server, client, packet):
         # receiving state from player
@@ -58,13 +58,18 @@ class GameServer:
                 if player.id == client.id:
                     player.updateState(data)
 
+    # game mechanics
+    def addBullet(self, player):
+        self.bullets.append(Bullet(player))
+
 
 class Player:
-    def __init__(self, id, client):
+    def __init__(self, id, client, gameserver):
+        self.gameserver = gameserver
         self.id =       id
         self.position = Vector2(0,0)
         self.velocity = Vector2(0,0)
-        self.direction = Vector(0,1)
+        self.direction = Vector2(0,1)
         self.angle =    0.0
         self.health =   100
         self.accelerating = False
@@ -82,7 +87,7 @@ class Player:
 
         self.angle = data['angle']
         self.direction = Vector2(NORMAL_VECTOR)
-        self.direction.rotate_ip(self.angle)
+        self.direction.rotate_ip(-self.angle)
 
         self.velocity.x = data['velocity.x']
         self.velocity.y = data['velocity.y']
@@ -95,7 +100,7 @@ class Player:
             self.reloadTime -= 1
 
         if self.reloadTime == 0 and self.shooting:
-            #shoot
+            self.gameserver.addBullet(self)
             self.reloadTime = 60
 
 class Bullet:
@@ -106,14 +111,14 @@ class Bullet:
 
         self.direction =    player.direction
         self.damage =       10
-        self.velocity =     0.5
+        self.velocity =     8
 
         self.w = 8
         self.h = 8
 
     def update(self):
         # move the bullet
-        self.position + self.direction * self.velocity
+        self.position = self.position + self.direction * self.velocity
 
 def gamemonitor(players, bullets):
     gm = GameMonitor(players, bullets)

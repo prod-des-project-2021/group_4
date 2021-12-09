@@ -111,7 +111,7 @@ class Service:
             else:
                 if command in self.commands:
                     if(self.commands[command][1] != None):
-                        self.commands[command][0](self.commands[command][1])
+                        self.commands[command][0](*self.commands[command][1])
                     else:
                         self.commands[command][0]()
                 else:
