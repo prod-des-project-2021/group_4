@@ -28,7 +28,7 @@ def gamestate_unpack(raw):
 # returns list encoded in bytes
 def gamestate_pack(players, player_own_id):
 
-    player_count = len(players)-1
+    player_count = len(players)
 
     # getting a copy of gamestate format
     gamestate_format = str(GAME_STATE_FORMAT)
@@ -38,9 +38,8 @@ def gamestate_pack(players, player_own_id):
 
     player_bytes = bytes()
     for player in players:
-        if player.id != player_own_id:
-            player_packed = playerstate_pack(player)
-            player_bytes = player_bytes + player_packed
+        player_packed = playerstate_pack(player)
+        player_bytes = player_bytes + player_packed
 
     packed = struct.pack(gamestate_format,
         player_own_id,
