@@ -50,7 +50,7 @@ class Client:
     def start(self):
         self.receiverThread.start()
         self.senderThread.start()
-        self.processorThread.start()
+        #self.processorThread.start()
 
     def stop(self):
         self.running = False
@@ -67,7 +67,7 @@ class Client:
     ####################
     def receiver(self):
         while(self.running):
-            time.sleep(0.01)
+            #time.sleep(0.01)
             try:
                 raw = self.socket.recvfrom(self.bufferSize)
                 self.receive_time = time.perf_counter()
@@ -75,7 +75,8 @@ class Client:
                 packet = Packet()
                 packet.decode(raw[0])
 
-                self.inputBuffer.append(packet)
+                #self.inputBuffer.append(packet)
+                self.onReceive(self, packet)
             except socket.error:
                 print("Server closed the connection, probably...")
                 self.running = False
@@ -85,14 +86,12 @@ class Client:
     ##################
     def sender(self):
         while(self.running):
-            time.sleep(0.01)
+            time.sleep(0.02)
 
             while self.outputBuffer:
                 self.send_time = time.perf_counter()
                 packet = self.outputBuffer.popleft()
-
-                with self.socket_lock:
-                    self.socket.sendto(packet, (self.ip, self.port))
+                self.socket.sendto(packet, (self.ip, self.port))
 
             # if we haven't sent anything in a while, send a ping packet
             if(not self.outputBuffer and self.send_time + 0.2 < time.perf_counter()):
@@ -105,8 +104,7 @@ class Client:
     #####################
     def processor(self):
         while(self.running):
-            time.sleep(0.02)
-
+            #time.sleep(0.005)
             while self.inputBuffer:
                 packet = self.inputBuffer.popleft()
                 self.onReceive(self, packet)

@@ -59,13 +59,12 @@ class Player:
         self.shooting = 0
         self.max_health = 100
         self.health = self.max_health
-          
+        self.id = 0
+        self.alive = True 
+
     def draw(self, screen):
         screen.blit(self.rotatedSprite, (int(self.position.x-self.dimensions.width/2), int(self.position.y-self.dimensions.height/2)))
-        pygame.draw.line(screen, (255,255,255), (ZERO_X, 0), (ZERO_X, ZERO_Y*2))
-        pygame.draw.line(screen, (255,255,255), (0, ZERO_Y), (ZERO_X*2, ZERO_Y))
-        pygame.draw.line(screen, (255,0,0), (ZERO_X, ZERO_Y), (ZERO_X+self.direction.x*50, ZERO_Y+self.direction.y*50))
-        pygame.draw.line(screen, (0,255,0), (ZERO_X, ZERO_Y), (ZERO_X+self.velocity.x*20, ZERO_Y+self.velocity.y*20))
+
 
     def rotate(self):
         self.direction = Vector2(self.UP)
@@ -97,8 +96,8 @@ class Player:
                 self.velocity -= braking/2
                 # if velocity is smaller than braking, just zero it
                 if(self.velocity.length() < braking.length()):
-                    self.velocity = Vector2(0,0)    
-        
+                    self.velocity = Vector2(0,0)
+
         #restricting player position
         if self.position.x >= 1920:
             self.velocity = Vector2(0,0)
@@ -115,7 +114,7 @@ class Player:
 
         self.position += self.velocity
         self.rotate()
-       
+
 def radToDec(rad):
     return (rad*180/math.pi)
 

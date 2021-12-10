@@ -1,17 +1,18 @@
 import pygame, math, random, struct
 from pygame.constants import JOYHATMOTION, MOUSEBUTTONDOWN
 from GameObjects import Player, Bullet, ParticleEmitter, DestroyEnemy
-from pygame import transform
+from pygame import Rect, transform
 from pygame.draw import rect
 from pygame.transform import rotate
 from networking import Client, Packet
+import gamepackets
 
 pygame.init()
 
 #resolitions in 16:9 aspect ratio: 720p=1280x720, 1080p=1920x1080
 #resolutions in 1:1 aspect ratio (that look good): 600x600, 900x900
-displaywidth = 1280
-displayheight = 720
+displaywidth = 1920
+displayheight = 1080
 screen = pygame.display.set_mode((displaywidth, displayheight))
 
 destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
@@ -19,8 +20,11 @@ destroyEnemyGroup = pygame.sprite.Group() #Create group for the sprites
 #Caption
 pygame.display.set_caption("Multiplayer Game")
 
+#Background
+background = pygame.image.load("space.jpg")
+background = pygame.transform.scale(background, (1920, 1080))
+
 #Player values
-angle = 0
 bullets = []
 enemies = []
 tickrate = 120
@@ -29,8 +33,10 @@ firerate = 2        #shots per second (keep under tickrate since maximum amount 
 bulletspeed = 8
 width = 64
 height = 64
-basespeed = 4
-slowmodifier = 0.5
+playerlist = list()
+own_id = 0
+
+
 
 #colors
 grey = 75,75,75
@@ -41,30 +47,6 @@ yellow = 255,255,0
 white = 255,255,255
 black = 0,0,0
 
-class Square:
-    def __init__(self, color, x, y, width, height, speed):
-        self.rect = pygame.Rect(x,y,width,height)
-        self.color = color
-        self.speed = speed
-    def draw(self, screen):
-        pygame.draw.rect(screen, self.color, self.rect)
-
-class Enemy(Square):
-    def __init__(self, color, ex, ey, width, height):
-        self.rect = pygame.Rect(ex,ey, width, height)
-        self.width = width
-        self.height = height
-        self.x = ex
-        self.y = ey
-        self.color = color
-
-    def moveEnemy(self):
-        self.dx = 0                           #most of these are useless when we get other players from server
-        self.dy = basespeed * slowmodifier    #here for testing only (get these from server at some point)
-        self.x = self.x + self.dx
-        self.y = self.y + self.dy       
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
 
 def rotate(surface,angle,width,height):
    rotated_surface = pygame.transform.rotozoom(surface,angle,1)
@@ -72,8 +54,11 @@ def rotate(surface,angle,width,height):
    return rotated_surface, rotated_rect
 
 def onReceive(client, packet):
-    if True:
-        print("pong")
+    global playerlist
+    global own_id
+    if packet.type == gamepackets.GAME_STATE:
+        own_id, playerlist = gamepackets.gamestate_unpack(packet.payload)
+      
 
 if __name__ == '__main__':
     pygame.init()
@@ -81,7 +66,8 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     running = True
 
-    client = Client("127.0.0.1", 5555)
+    client = Client("135.181.97.38", 5555)
+    client.onReceive = onReceive
     client.start()
 
     playerImg = pygame.image.load('res/player.png')
@@ -93,14 +79,14 @@ if __name__ == '__main__':
     playerEngineTrail = ParticleEmitter(engineTrailImg)
     
     while(running):
-        client.onReceive = onReceive
+        screen.fill(black)
+        screen.blit(background,(0,0))
         Player.ZERO_X = pygame.display.Info().current_w /  2
         Player.ZERO_Y = pygame.display.Info().current_h /  2
         mouse_x, mouse_y = pygame.mouse.get_pos()
         player_angle = math.atan2(mouse_x - player.position.x, mouse_y - player.position.y)
         player.setAngle(player_angle)
         mousebuttons = pygame.mouse.get_pressed()
-        screen.fill(black)
         playerEngineTrail.draw(screen)
         player.draw(screen)
         playerEngineTrail.updatePosition(player.position.x, player.position.y)
@@ -112,21 +98,16 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                client.stop()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouseDown = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 mouseDown = False
 
-        #randomized enemies for testing purposes
-        if random.randint(1,60) == 1:
-            ex = random.randint(1, pygame.display.Info().current_w - width)
-            e = Enemy(green, ex, 0, width, height)
-            enemies.append(e)
-
         if mousebuttons[0]:
             player.shooting = 1
             if lastshot > tickrate/firerate:
-                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
+                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle, own_id)
                 bullets.append(b)
                 lastshot = 0
         else:
@@ -145,27 +126,42 @@ if __name__ == '__main__':
         for b in bullets:
             b.moveBullet()
             b.draw(screen)
-            for e in enemies:
-                if b.rect.colliderect(e.rect):
-                    destroyEnemy = DestroyEnemy(b.x, b.y)
-                    destroyEnemyGroup.add(destroyEnemy)
-                    enemies.remove(e)
-                    bullets.remove(b)
+            
+        for p in playerlist:
+            if int (p['id']) != own_id: 
+                #pygame.draw.rect(screen,green,Rectangle)
+                enemyAngle = p['angle']
+                rotatedEnemy = pygame.transform.rotate(enemyImg, int(enemyAngle)+90)
+                enemyDimensions = rotatedEnemy.get_rect()
+                screen.blit(rotatedEnemy, (int(p['position.x']-enemyDimensions.width/2), int(p['position.y']-enemyDimensions.height/2)))
                 
-        for e in enemies:
-            e.moveEnemy()
-            e.draw(screen)
-            if e.rect.y > pygame.display.Info().current_h:
-                enemies.remove(e)
+                if p['shooting'] == True:
+                    #enemy shooting
+                    b = Bullet(bulletImg, p['position.x'], p['position.y'], bulletspeed, -enemyAngle, p['id'])
+                    bullets.append(b)
+                p['shooting'] = False
+                pygame.draw.rect(screen,red,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,int(p['health'])/2,10))
+                pygame.draw.rect(screen, white,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,50,10),1)
+            
+            else :
+                pygame.draw.rect(screen,red,(int(player.position.x)-width/2+7,int(player.position.y)+25,int(p['health'])/2,5))
+                pygame.draw.rect(screen, white,(int(player.position.x)-width/2+7,int(player.position.y)+25,50,5),1)
+            
+            Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)
+            for b in bullets:
+                    if b.rect.colliderect(Rectangle) and b.owner!=int(p['id']):
+                        destroyEnemy = DestroyEnemy(b.x,b.y)
+                        destroyEnemyGroup.add(destroyEnemy)
+                        bullets.remove(b)
 
-        #print(str(player.position.x) + " " + str(player.position.y))
-        encoded_position = struct.pack("d d", player.position.x, player.position.y)
+        encoded_position = gamepackets.playerstate_pack(player)
         packet = Packet()
-        packet.type = 11
+        packet.type = gamepackets.PLAYER_STATE
         packet.setPayload(encoded_position)
         client.send(packet)
 
         clock.tick(tickrate)
         pygame.display.flip()
+        print(clock.get_fps())
 
 pygame.quit()
