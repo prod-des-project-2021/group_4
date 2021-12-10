@@ -66,7 +66,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     running = True
 
-    client = Client("127.0.0.1", 5555)
+    client = Client("135.181.97.38", 5555)
     client.onReceive = onReceive
     client.start()
 
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                     #enemy shooting
                     b = Bullet(bulletImg, p['position.x'], p['position.y'], bulletspeed, -enemyAngle, p['id'])
                     bullets.append(b)
-
+                p['shooting'] = False
                 pygame.draw.rect(screen,red,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,int(p['health'])/2,10))
                 pygame.draw.rect(screen, white,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,50,10),1)
             
@@ -162,5 +162,6 @@ if __name__ == '__main__':
 
         clock.tick(tickrate)
         pygame.display.flip()
+        print(clock.get_fps())
 
 pygame.quit()
