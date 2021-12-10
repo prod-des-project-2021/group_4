@@ -3,7 +3,6 @@ import pygame
 class GameMonitor:
     def __init__(self, players, bullets):
         self.players = players
-        #self.rockets = rockets
         self.bullets = bullets
         pygame.init()
         widthWindow = 1600
@@ -37,6 +36,4 @@ class GameMonitor:
             position = pygame.Rect(int(bullet.position.x),int(bullet.position.y),8,8)
             pygame.draw.rect(self.screen,(0,0,255),position)
 
-        #for rocket in self.rockets:
-            #position = pygame.Rect(int(rocket.position.x),int(rocket.position.y),12,12)
-            #pygame.draw.rect(self.screen,(0,255,0),position)
+        
