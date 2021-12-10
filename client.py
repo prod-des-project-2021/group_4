@@ -107,7 +107,7 @@ if __name__ == '__main__':
         if mousebuttons[0]:
             player.shooting = 1
             if lastshot > tickrate/firerate:
-                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle)
+                b = Bullet(bulletImg, (player.position.x-9), (player.position.y-9), bulletspeed, -player.angle, own_id)
                 bullets.append(b)
                 lastshot = 0
         else:
@@ -128,22 +128,32 @@ if __name__ == '__main__':
             b.draw(screen)
             
         for p in playerlist:
-            if int (p['id']) != own_id:
-                Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)    
-                pygame.draw.rect(screen,green,Rectangle)
-                for b in bullets:
-                    if b.rect.colliderect(Rectangle):
-                        destroyEnemy = DestroyEnemy(b.x,b.y)
-                        destroyEnemyGroup.add(destroyEnemy)
-                        bullets.remove(b)
+            if int (p['id']) != own_id: 
+                #pygame.draw.rect(screen,green,Rectangle)
+                enemyAngle = p['angle']
+                rotatedEnemy = pygame.transform.rotate(enemyImg, int(enemyAngle)+90)
+                enemyDimensions = rotatedEnemy.get_rect()
+                screen.blit(rotatedEnemy, (int(p['position.x']-enemyDimensions.width/2), int(p['position.y']-enemyDimensions.height/2)))
+                
+                if p['shooting'] == True:
+                    #enemy shooting
+                    b = Bullet(bulletImg, p['position.x'], p['position.y'], bulletspeed, -enemyAngle, p['id'])
+                    bullets.append(b)
+
                 pygame.draw.rect(screen,red,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,int(p['health'])/2,10))
                 pygame.draw.rect(screen, white,(int(p['position.x'])-width/2+7,int(p['position.y'])+25,50,10),1)
+            
             else :
                 pygame.draw.rect(screen,red,(int(player.position.x)-width/2+7,int(player.position.y)+25,int(p['health'])/2,5))
                 pygame.draw.rect(screen, white,(int(player.position.x)-width/2+7,int(player.position.y)+25,50,5),1)
             
+            Rectangle = pygame.Rect(int(p['position.x'])-width/2,int(p['position.y'])-height/2,width,height)
+            for b in bullets:
+                    if b.rect.colliderect(Rectangle) and b.owner!=int(p['id']):
+                        destroyEnemy = DestroyEnemy(b.x,b.y)
+                        destroyEnemyGroup.add(destroyEnemy)
+                        bullets.remove(b)
 
-        #print(str(player.position.x) + " " + str(player.position.y))
         encoded_position = gamepackets.playerstate_pack(player)
         packet = Packet()
         packet.type = gamepackets.PLAYER_STATE
