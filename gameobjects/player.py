@@ -38,7 +38,7 @@ class Player(GameObject):
 
     def setNickname(self, nickname):
         self.nickname = nickname
-        self.nickname_text = TextObject(self.nickname, "Arial", (255,255,255))
+        self.nickname_text.updateText(self.nickname)
 
     def damage(self):
         if(self.shield > 0):
@@ -105,6 +105,7 @@ class Player(GameObject):
     def mapState(self, pdict):
         self.position.x = pdict["position.x"]
         self.position.y = pdict["position.y"]
+        self.setNickname(pdict["nickname"])
         self.angle = pdict["angle"]
         self.health = pdict["health"]
         self.alive = pdict["alive"]

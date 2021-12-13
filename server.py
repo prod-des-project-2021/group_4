@@ -92,6 +92,7 @@ class Player:
         self.shooting = False
         self.reloadTime = 0
         self.alive = True
+        self.nickname = "player"
 
         self.w = 30
         self.h = 30
@@ -111,6 +112,8 @@ class Player:
             self.velocity.y = data['velocity.y']
             self.accelerating = data['accelerating']
             self.shooting = data['shooting']
+
+            self.nickname = data['nickname']
         else:
             self.shooting = False
 

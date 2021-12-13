@@ -17,7 +17,7 @@ class TextObject:
     def updateText(self, text):
         # update the text only when it's actually changing
         if(self.text != text):
-            self.text = text
+            self.text = text.rstrip(' \t\r\n\0')
             self.textSurface = self.font.render(self.text, False, self.color)
 
     def setPosition(self, x, y):
