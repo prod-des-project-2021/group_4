@@ -90,8 +90,15 @@ class Game(State):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         mousebuttons = pygame.mouse.get_pressed()
 
+        # if alive, allow state updates
         if self.player.alive:
             self.player.setState(mousebuttons[0], mousebuttons[2])
+        else:
+            # exploding the player upon death only once 
+            if self.player.exploded == False:
+                self.explosions.append(Explosion(self.player.position.x, self.player.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6], big = True))
+                self.player.exploded = True
+
         self.player.update()
 
         if(mousebuttons[0] and self.player.alive):

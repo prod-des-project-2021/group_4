@@ -26,6 +26,9 @@ class Player(GameObject):
         self.shield = 100
         self.max_shield = 100
 
+        # exploding the normal player object
+        self.exploded = False
+
         self.engine_trail = ParticleEmitter(enginetrailSprite)
 
     def draw(self, screen):
@@ -94,7 +97,7 @@ class Player(GameObject):
 
         if self.position.y > 890:
             self.position.y = 890
-            
+
         self.position += self.velocity
 
     def setState(self, btn1, btn2):
