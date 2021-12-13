@@ -1,10 +1,10 @@
 from statemachine import State
-from gameobjects import GameObject
-from gameobjects import TextObject
-from gameobjects import Player
-from gameobjects import Bullet
-from gameobjects import Explosion
-from gameobjects import ParticleEmitter, Particle
+from GameObjects import GameObject
+from GameObjects import TextObject
+from GameObjects import Player
+from GameObjects import Bullet
+from GameObjects import Explosion
+from GameObjects import ParticleEmitter, Particle
 from networking import Client
 from networking import Packet
 import gamepackets
