@@ -3,11 +3,12 @@ from .textobject import TextObject
 from .enginetrail import ParticleEmitter, Particle
 from pygame.math import Vector2
 import pygame
+import random
 
 class Player(GameObject):
     def __init__(self, sprite, enginetrailSprite):
         super().__init__(sprite)
-
+        self.position       = Vector2(random.randint(30,1580), random.randint(30,870))
         self.accelerating   = False
         self.shooting       = False
         self.acceleration   = 0.05
@@ -88,19 +89,15 @@ class Player(GameObject):
 
         if self.position.x > 1590:
             self.position.x = 1590
-            self.velocity = Vector2(0,0)
 
         if self.position.x < 10:
             self.position.x = 10
-            self.velocity = Vector2(0,0)
 
         if self.position.y < 10:
             self.position.y = 10
-            self.velocity = Vector2(0,0)
 
         if self.position.y > 890:
             self.position.y = 890
-            self.velocity = Vector2(0,0)
 
         self.position += self.velocity
 

@@ -49,7 +49,6 @@ class Game(State):
         # player object
         self.player = Player(self.playerSprite, self.enginetrailSprite)
         self.player.setAngleOffset(-90)
-        self.player.setPosition(300,300)
         self.player.setNickname(nick)
 
         self.playerlist = dict()
@@ -94,7 +93,7 @@ class Game(State):
         if self.player.alive:
             self.player.setState(mousebuttons[0], mousebuttons[2])
         else:
-            # exploding the player upon death only once 
+            # exploding the player upon death only once
             if self.player.exploded == False:
                 self.explosions.append(Explosion(self.player.position.x, self.player.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6], big = True))
                 self.player.exploded = True
