@@ -153,7 +153,7 @@ def tests():
     print("test")
 
 def main():
-    server = Service("", 5555)
+    server = Service("127.0.0.1", 5555)
     gameserver = GameServer()
 
     # hooking the vents

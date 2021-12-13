@@ -1,23 +1,10 @@
-import math
-import pygame
+from .gameobject import GameObject
 
-class Bullet:
-    def __init__(self, image, x, y, speed, angle, playerId):
-        self.angle = angle+90
-        #  ^^  send bullet angle to server whenever you are at that point
-        self.image = pygame.transform.rotozoom(image, int(-1*self.angle), 1)
-        self.dx = math.cos(self.angle/180*math.pi)*speed
-        self.dy = math.sin(self.angle/180*math.pi)*speed
-        self.x = x
-        self.y = y
-        self.rect = self.image.get_rect(topleft=(self.x,self.y))
-        self.owner = playerId
+class Bullet(GameObject):
+    def __init__(self, sprite):
+        super().__init__(sprite)
+        self.speed = 8
+        self.owner = 0
 
-    def draw(self,screen):
-        screen.blit(self.image,(self.x,self.y))
-
-    def moveBullet(self):
-        self.x = self.x + self.dx
-        self.y = self.y + self.dy
-        self.rect = self.image.get_rect(topleft=(self.x,self.y))
-        
+    def update(self):
+        self.position += self.direction * self.speed
