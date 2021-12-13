@@ -25,6 +25,7 @@ class Game(State):
         # initialize pygame
         pygame.init()
         pygame.font.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((1600,900))
         pygame.display.set_caption("Multiplayer Game")
         self.clock  = pygame.time.Clock()
@@ -37,7 +38,13 @@ class Game(State):
         self.bulletSprite = pygame.image.load('res/ammo_small.png')
         self.enginetrailSprite = pygame.image.load('res/engine_trail_particle.png')
         self.background = pygame.image.load("space.jpg")
-        self.background = pygame.transform.scale(self.background, (1920,1080))
+        self.background = pygame.transform.scale(self.background, (1600,900))
+
+        self.explosion_small = pygame.mixer.Sound("sfx/explosion_small.ogg")
+        self.explosion_big = pygame.mixer.Sound("sfx/explosion_big.ogg")
+        self.laser = pygame.mixer.Sound("sfx/laser.ogg")
+        self.engine = pygame.mixer.Sound("sfx/engine.ogg")
+
 
         self.e1 = pygame.image.load('res/e1.png')
         self.e2 = pygame.image.load('res/e2.png')
@@ -95,6 +102,7 @@ class Game(State):
         else:
             # exploding the player upon death only once
             if self.player.exploded == False:
+                self.explosion_big.play()
                 self.explosions.append(Explosion(self.player.position.x, self.player.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6], big = True))
                 self.player.exploded = True
 
@@ -102,6 +110,7 @@ class Game(State):
 
         if(mousebuttons[0] and self.player.alive):
             if(self.player.reloadTime == 0):
+                self.laser.play()
                 bullet = Bullet(self.bulletSprite)
                 bullet.owner = self.player.id
                 bullet.setAngleOffset(-90)
@@ -119,10 +128,12 @@ class Game(State):
 
             for enemy in self.enemies:
                 if(bullet.colliding(enemy, "rect") and bullet.owner != enemy.id):
+                    self.explosion_small.play()
                     self.explosions.append(Explosion(bullet.position.x, bullet.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6]))
                     self.bullets.remove(bullet)
 
             if(bullet.colliding(self.player, "rect") and bullet.owner != self.player.id and self.player.alive):
+                self.explosion_small.play()
                 self.explosions.append(Explosion(bullet.position.x, bullet.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6]))
                 self.bullets.remove(bullet)
 
@@ -131,6 +142,7 @@ class Game(State):
             enemy.update()
 
             if(enemy.shooting and enemy.reloadTime == 0):
+                self.laser.play()
                 bullet = Bullet(self.bulletSprite)
                 bullet.owner = enemy.id
                 bullet.setAngleOffset(-90)
@@ -141,6 +153,7 @@ class Game(State):
                 enemy.reloadTime = enemy.reload
 
             if(not int(enemy.alive)):
+                self.explosion_big.play()
                 self.explosions.append(Explosion(enemy.position.x, enemy.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6], big = True))
                 self.enemies.remove(enemy)
 
@@ -183,7 +196,7 @@ class Game(State):
 
     def draw(self):
         self.screen.fill(pygame.Color("black"))
-        #self.screen.blit(self.background,(0,0))
+        self.screen.blit(self.background,(0,0))
         self.player.draw(self.screen)
 
         for enemy in self.enemies:
