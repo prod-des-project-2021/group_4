@@ -34,7 +34,6 @@ class Player(GameObject):
             pygame.draw.rect(screen, (255,0,0), (self.position.x - 25, self.position.y+32, int(self.health/2), 5))
             self.engine_trail.draw(screen)
             self.nickname_text.draw(screen)
-        
 
     def setNickname(self, nickname):
         self.nickname = nickname
@@ -86,16 +85,16 @@ class Player(GameObject):
 
         if self.position.x > 1590:
             self.position.x = 1590
-        
+
         if self.position.x < 10:
             self.position.x = 10
-        
+
         if self.position.y < 10:
             self.position.y = 10
 
         if self.position.y > 890:
             self.position.y = 890
-
+            
         self.position += self.velocity
 
     def setState(self, btn1, btn2):
