@@ -88,15 +88,19 @@ class Player(GameObject):
 
         if self.position.x > 1590:
             self.position.x = 1590
+            self.velocity = Vector2(0,0)
 
         if self.position.x < 10:
             self.position.x = 10
+            self.velocity = Vector2(0,0)
 
         if self.position.y < 10:
             self.position.y = 10
+            self.velocity = Vector2(0,0)
 
         if self.position.y > 890:
             self.position.y = 890
+            self.velocity = Vector2(0,0)
 
         self.position += self.velocity
 
