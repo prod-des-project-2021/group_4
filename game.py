@@ -60,7 +60,7 @@ class Game(State):
         self.explosions = list()
 
         # initialize networking client
-        self.client = Client("127.0.0.1", 5555)
+        self.client = Client(self.ip, 5555)
         self.client.onReceive = self.onReceive
         self.client.start()
 
