@@ -84,7 +84,13 @@ class Game(State):
                     self.running = False
                     self.client.stop()
                     sys.exit()
-
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.stateMachine.goto("menu")
+                        self.running = False
+                        self.client.stop()
+                        sys.exit()
+                        
             self.update()
             self.draw()
             self.clock.tick(self.tickrate)
