@@ -7,6 +7,7 @@ def main():
     appState.register("menu", Menu)
     appState.register("game", Game)
     appState.goto("menu")
+    #appState.goto("game", args=("player", "127.0.0.1"))
 
 if __name__ == '__main__':
     main()

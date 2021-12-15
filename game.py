@@ -12,6 +12,7 @@ import pygame
 import math
 import time
 import random
+import sys
 
 class Game(State):
     def __init__(self, stateMachine):
@@ -40,10 +41,10 @@ class Game(State):
         self.background = pygame.image.load("space.jpg")
         self.background = pygame.transform.scale(self.background, (1600,900))
 
-        self.explosion_small = pygame.mixer.Sound("sfx/explosion_small.ogg")
-        self.explosion_big = pygame.mixer.Sound("sfx/explosion_big.ogg")
-        self.laser = pygame.mixer.Sound("sfx/laser.ogg")
-        self.engine = pygame.mixer.Sound("sfx/engine.ogg")
+        self.explosion_small = pygame.mixer.Sound("./sfx/explosion_small.ogg")
+        self.explosion_big = pygame.mixer.Sound("./sfx/explosion_big.ogg")
+        self.laser = pygame.mixer.Sound("./sfx/laser.ogg")
+        self.engine = pygame.mixer.Sound("./sfx/engine.ogg")
 
 
         self.e1 = pygame.image.load('res/e1.png')
@@ -57,6 +58,7 @@ class Game(State):
         self.player = Player(self.playerSprite, self.enginetrailSprite)
         self.player.setAngleOffset(-90)
         self.player.setNickname(nick)
+        self.death_time = 0
 
         self.playerlist = dict()
         self.own_id = 0
@@ -81,6 +83,7 @@ class Game(State):
                 if event.type == pygame.QUIT:
                     self.running = False
                     self.client.stop()
+                    sys.exit()
 
             self.update()
             self.draw()
@@ -105,8 +108,14 @@ class Game(State):
                 self.explosion_big.play()
                 self.explosions.append(Explosion(self.player.position.x, self.player.position.y, [self.e1, self.e2, self.e3, self.e4, self.e5, self.e6], big = True))
                 self.player.exploded = True
+                self.death_time = time.time()
 
         self.player.update()
+
+        # return to mainmenu if dead
+        if(self.death_time != 0 and time.time() > self.death_time+3):
+            self.client.stop()
+            self.stateMachine.goto("menu")
 
         if(mousebuttons[0] and self.player.alive):
             if(self.player.reloadTime == 0):
