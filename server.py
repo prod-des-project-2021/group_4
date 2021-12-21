@@ -29,7 +29,7 @@ class GameServer:
         for player in self.players:
             #collision detection
             for bullet in self.bullets:
-                if isColliding(bullet, player) and player.id != bullet.player.id:
+                if isColliding(bullet, player) and player.id != bullet.player.id and player.alive:
                     player.health = player.health - bullet.damage
                     self.bullets.remove(bullet)
 
@@ -92,6 +92,7 @@ class Player:
         self.shooting = False
         self.reloadTime = 0
         self.alive = True
+        self.nickname = "player"
 
         self.w = 30
         self.h = 30
@@ -112,6 +113,10 @@ class Player:
             self.accelerating = data['accelerating']
             self.shooting = data['shooting']
 
+            self.nickname = data['nickname']
+        else:
+            self.shooting = False
+
 
     def update(self):
         if self.reloadTime > 0:
@@ -120,9 +125,9 @@ class Player:
         if self.health <= 0:
             self.alive = False
 
-        if self.reloadTime == 0 and self.shooting:
+        if self.reloadTime == 0 and self.shooting and self.alive:
             self.gameserver.addBullet(self)
-            self.reloadTime = 60
+            self.reloadTime = 10
 
 class Bullet:
     # player = owner of the bullet

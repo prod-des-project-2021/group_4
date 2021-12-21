@@ -4,6 +4,7 @@ from .formats import *
 def playerstate_pack(player):
     packed = struct.pack(PLAYER_STATE_FORMAT,
         player.id,
+        bytes(player.nickname, 'utf-8'),
         player.position.x,
         player.position.y,
         player.angle,
@@ -20,14 +21,15 @@ def playerstate_unpack(raw):
     unpacked = struct.unpack(PLAYER_STATE_FORMAT, raw)
     data = {
         "id":           unpacked[0],
-        "position.x":   unpacked[1],
-        "position.y":   unpacked[2],
-        "angle":        unpacked[3],
-        "velocity.x":   unpacked[4],
-        "velocity.y":   unpacked[5],
-        "health":       unpacked[6],
-        "accelerating": unpacked[7],
-        "shooting":     unpacked[8],
-        "alive":        unpacked[9]
+        "nickname":     unpacked[1].decode("utf-8"),
+        "position.x":   unpacked[2],
+        "position.y":   unpacked[3],
+        "angle":        unpacked[4],
+        "velocity.x":   unpacked[5],
+        "velocity.y":   unpacked[6],
+        "health":       unpacked[7],
+        "accelerating": unpacked[8],
+        "shooting":     unpacked[9],
+        "alive":        unpacked[10]
     }
     return data
